@@ -1,0 +1,311 @@
+{% extends 'baseUserCenter.html' %}
+
+{% load static %}
+
+{% block rightContent %}
+<div class="contain" style="margin-left: 30px;">
+	<!-- Section Title -->
+	<div class="container">
+		<span style="font-size: 24px; font-weight: bolder;">全部订单</span>
+	</div>
+
+	<!-- Section Content -->
+	{% csrf_token %}
+	{% for order in ordersPage %}
+	<div class="container bolder" style="border-style: solid; border-color: lightgrey; border-width: 0.5px; padding: 0px; margin-bottom: 20px;">
+		
+		<!-- To summary information bar -->
+		<div class="container summaryBar">
+			<div class="row d-flex justify-content-center align-items-center" style="font-size: small;">
+				<div class="col-3 orderId d-flex justify-content-center align-items-center" style="background-color: #1f216d; color: white; font-size: medium;">
+					NO. {{ order.orderId }}
+				</div>
+				<div class="col-8 orderHeader">
+					下单时间：{{ order.create_time }}
+				</div>
+				<div class="col-1 orderHeader d-flex justify-content-center align-items-center">
+					{% csrf_token %}
+					<input class="btn toPayment" orderStatus="{{ order.orderStatus }}" orderId="{{ order.orderId }}" paymentMethod="{{ order.paymentMethod }}" type="submit" style="padding: 0% 10%; margin: 0px;" name="toPayment" value="去付款">
+				</div>
+			</div>
+		</div>
+
+		<hr style="padding: 0px; margin: 0px;">
+
+		<!-- To summary information bar -->
+		<div class="container">
+			<div class="row border-style" style="font-size: small;">
+				<div class="col-3" style="border-right-style: solid; border-right-width: 0.5px; border-right-color:lightgrey">
+					<div class="container" style="margin: 10px 0px 0px 0px; padding: 0px;">
+						<p>
+							订单状态：
+							{% if order.orderStatus == 1 %}
+							<span style="color: red; font-weight: bold;">{{ order.statusName }}</span>
+							{% elif order.orderStatus == 2 or order.orderStatus == 3 %}
+							<span style="color: orange; font-weight: bold;">{{ order.statusName }}</span>
+							{% elif order.orderStatus == 4 or order.orderStatus == 5 %}
+							<span style="color: lightgrey; font-weight: bold;">{{ order.statusName }}</span>
+							{% endif %}
+						</p>
+						<p>付款方式：{{ order.paymentMethodName }}</p>
+						<p>寄件: {{order.sender}}, {{order.senderAddr}}, {{order.senderTel}}</p>
+						<p>收件: {{order.receiver}}, {{order.receiverAddr}}, {{order.receiverTel}}</p>
+					</div>
+				</div>
+				<div class="col-8" style="border-right-style: solid; border-right-width: 0.5px; border-right-color:lightgrey">
+					
+					<!-- Order Product List -->
+					<div class="container" style="margin: 10px 0px 0px 0px; padding: 0px;">
+						<div class="row">
+							{% for sku in order.orderSkus %}
+							<div class="col-8">
+								{{ sku.skuName }}
+							</div>
+							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
+								x {{ sku.skuCount }}
+							</div>
+							<div class="col-2" style="padding: 0px;">
+								${{ sku.skuPrice }}
+							</div>
+						{% endfor %}
+						</div>
+					</div>
+
+					<hr>
+					
+					<!-- Product Cost -->
+					<div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+						<div class="row">
+							<div class="col-8 d-flex justify-content-end">
+								商品小计
+							</div>
+							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
+								x {{ order.totalSkuQty }}
+							</div>
+							<div class="col-2" style="padding: 0px;">
+								${{ order.totalSkuPrice }}
+							</div>
+						</div>
+					</div>
+
+					<!-- add-on Service Cost -->
+					<div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+						<div class="row">
+							<div class="col-8 d-flex justify-content-end">
+								贴心服务
+							</div>
+							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
+								x {{ order.totalServiceQty }}
+							</div>
+							<div class="col-2" style="padding: 0px;">
+								${{ order.totalServicePrice }}
+							</div>
+						</div>
+					</div>
+
+					<!-- Logistics Cost -->
+					<div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+						<div class="row">
+							<div class="col-8 d-flex justify-content-end align-items-center">
+								运费
+							</div>
+							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
+								{{ order.totalLogisticsWeight }}{{ order.logisticsUnit }}
+							</div>
+							<div class="col-2" style="padding: 0px;">
+								$<em>{{ order.totalLogisticsPrice }}</em>
+							</div>
+						</div>
+					</div>
+
+					<!-- Transaction Cost -->
+					<div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+						<div class="row">
+							<div class="col-8 d-flex justify-content-end align-items-center">
+								{% if order.paymentMethod == 1 %}
+								交易手续费 (不含在总计，支付时额外添加)
+								{% elif order.paymentMethod == 2 %}
+								交易手续费 (含在总计)
+								{% else %}
+								交易手续费
+								{% endif %}
+							</div>
+							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
+								{% if order.paymentMethod == 1 %}
+								1% 
+								{% elif order.paymentMethod == 2 %}
+								3.5% + $0.3
+								{% else %}
+								0%
+								{% endif %}
+							</div>
+							<div class="col-2" style="padding: 0px;">
+								$<em>{{ order.totalHandlingFee }}</em>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Total cost -->
+					<div class="container">
+						<div class="row">
+							<div class="col-8 d-flex justify-content-end align-items-center" style="padding: 0px; font-size: 20px; font-weight: bolder;">
+								总计
+							</div>
+							<div class="col-1">
+							</div>
+							<div class="col-3" style="padding: 0px; font-size: 24px;font-weight: bolder;color: red;">
+								${{ order.totalPrice }}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-1 d-flex justify-content-center align-items-center">
+					{% csrf_token %}
+					<input class="btn toOrderDetails" type="submit" style="padding: 0% 10%; margin: 0px;" data-order-id="{{ order.orderId }}" name="toOrderDetails" value="去详情">
+				</div>
+			</div>
+		</div>
+	</div>
+	{% endfor %}
+
+	<!-- Pagination -->
+	<div class="container text-center">
+		{% if ordersPage.has_previous %}
+		<a class="link-dark" style="text-decoration:none;" href="{% url 'user:order' ordersPage.previous_page_number %}"><上一页</a>
+		{% endif %}
+		{% for pindex in pages %}
+			{% if pindex == ordersPage.number %}
+			<a class="link-dark" style="font-weight: bolder;" href="{% url 'user:order' pindex %}" class="active">{{ pindex }}</a>
+			{% else %}
+			<a class="link-dark" style="text-decoration:none;" href="{% url 'user:order' pindex %}">{{ pindex }}</a>
+			{% endif %}
+		{% endfor %}
+		{% if ordersPage.has_next %}
+		<a class="link-dark" style="text-decoration:none;" href="{% url 'user:order' ordersPage.next_page_number %}">下一页></a>
+		{% endif %}
+	</div>
+
+</div>
+{% endblock rightContent %}
+
+
+{% block bottomfiles %}
+<!-- Pop up message box -->
+<div class="popupContainer" style="display: none;">
+	<div class="popup d-flex justify-content-center align-items-center" 
+		 style="width:300px; 
+				height:100px; 
+				border:2px solid #dddddd; 
+				border-top:2px solid #1f216d; 
+				background-color:#f7f7f7;
+				position:fixed;
+				left:50%;
+				margin-left:-150px;
+				top:50%;
+				margin-top:-50px;">
+		<p style="font-size: 24px; font-weight: bolder; color: #1f216d;">订单已付款</p>
+	</div>
+	<div class="mask"></div>
+</div>
+
+<script src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
+<script type="text/javascript">
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// To set the "row" heigh to the maximum of the column height within the row
+	$('.container.summaryBar').ready(function() {
+		var divHeight = 0
+		$('.orderHeader').each(function () {
+			divHeight = Math.max($(this).height(), divHeight)
+		})
+		$('.orderId').css('height', divHeight+'px');
+	});
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// To post orderDetails
+	$(document).ready(function() {
+		$('.toOrderDetails').on('click', function() {
+			var orderId = $(this).data('order-id');
+
+			window.location.href = '/order/details/' + orderId;
+
+			});
+		});
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// To create checkout session
+	// This is your test publishable API key.
+	$(document).ready(function() {
+		$('.toPayment').on('click', function() {
+			var csrf = $('input[name="csrfmiddlewaretoken"]').val()
+			var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+	
+			var orderStatus = $(this).attr('orderStatus');
+			var orderId = $(this).attr('orderId');
+			var paymentMethod = $(this).attr('paymentMethod');
+
+			// To check if order status is "unpaid"
+			if (orderStatus == 1) {
+
+				// To trigger "SuperPay": "https://doc.supaytechnology.com/EN/h5/index.html#api-OnlineH5_Interface-currentRate"
+				if (paymentMethod == 1) {
+					console.log(paymentMethod)
+				} 
+				
+				// To trigger "Stripe"
+				else if (paymentMethod == 2) {
+
+					console.log(paymentMethod)
+
+					fetch("/order/createcheckoutsession/" + orderId, {
+						method: "POST",
+						headers: {'X-CSRFToken': csrf}
+						})
+					.then(function (response) {
+						return response.json();
+						})
+					.then(function (session) {
+						return stripe.redirectToCheckout({ sessionId: session.id });
+						})
+					.then(function (result) {
+						// If redirectToCheckout fails due to a browser or network
+						// error, you should display the localized error message to your
+						// customer using error.message.
+						if (result.error) {
+							alert(result.error.message);
+							}
+						})
+					.catch(function (error) {
+							console.error("Error:", error);
+							});
+				} 
+				
+				// To redirect to "Bank Transfer" page
+				else if (paymentMethod == 3) {
+					
+					setTimeout(function() {
+						window.location.href = "{% url 'order:bankTransferDetailsView' %}";
+    				}, 0); 
+				}
+
+			}
+
+			else {
+				console.log(orderStatus)
+
+				// Show the popup and fade it in
+				$('.popupContainer').fadeIn();
+
+				// Set a timer to fade out the popup after 2000 milliseconds
+				setTimeout(function () {
+					$('.popupContainer').fadeOut();
+				}, 2000);
+			}
+
+		});
+
+	});
+
+
+</script>
+{% endblock bottomfiles %}

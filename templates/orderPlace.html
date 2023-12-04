@@ -1,0 +1,514 @@
+{% extends 'baseNoCart.html' %}
+{% load static %}
+
+{% block title %}爱优品礼品店-提交订单{% endblock title %}
+{% block pageTitle %}提交订单{% endblock pageTitle %}
+{% block body %}
+<style>
+    .btn.actionButton.active {background-color: #1f216d; color: white;}
+</style>
+
+<!-- Title of section -->
+<div class="container" style="padding: 20px">
+	<span style="font-size: 24px; font-weight: bolder;">寄收件人信息表</span>
+</div>
+
+<!-- Sending and receiving address management section -->
+<div class="container addressTable border">
+	
+	<!-- Table header -->
+	<div class="row justify-content-center align-items-center border-bottom" style="font-size:large; font-weight: bolder; margin: 0px">
+		
+		<!-- iSDefault Checkbox -->
+		<div class="col-2" style="text-align: center;">
+			
+		</div>
+
+		<!-- Receiver Name -->
+		<div class="col-2" style="text-align: center;">
+			姓名
+		</div>
+
+		<!-- Receiver Address -->
+		<div class="col-2" style="text-align: center;">
+			地址
+		</div>
+
+		<!-- Receiver Telephone -->
+		<div class="col-2" style="text-align: center;">
+			电话
+		</div>
+
+		<!-- Receiver Address -->
+		<div class="col-2" style="text-align: center;">
+			收件人身份证正面图片
+		</div>
+
+		<!-- Receiver Address -->
+		<div class="col-2" style="text-align: center;">
+			收件人身份证背面图片
+		</div>
+
+	</div>
+
+	<!-- Default Sender Address -->
+	<div class="row justify-content-center align-items-center border-bottom" style="margin: 0px;">
+		
+		<!-- Category -->
+		<div class="col-2" style="font-weight: bolder; text-align: center;">
+			<input type="hidden" id="senderAddressId" value="{{ senderAddressDefault.id }}">
+			寄件人
+		</div>
+
+		<!-- Sender Name -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+			{{ senderAddressDefault.sender }}
+		</div>
+
+		<!-- Sender Address -->
+		<div class="col-2" style="font-size:small; word-wrap: break-word;">
+			{{ senderAddressDefault.senderAddr }}
+		</div>
+
+		<!-- Sender Telephone -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+			{{ senderAddressDefault.senderTel }}
+		</div>
+
+		<!-- Sender IdImageFront -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+		</div>
+
+		<!-- Sender IdImageBack -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+		</div>
+
+	</div>
+
+	<!-- Default Receiver Address -->
+	<div class="row justify-content-center align-items-center" style="margin: 0px;">
+		
+		<!-- Category -->
+		<div class="col-2" style="font-weight: bolder; text-align: center;">
+			<input type="hidden" id="receiverAddressId" value="{{ receiverAddressDefault.id }}">
+			收件人
+		</div>
+
+		<!-- Receiver Name -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+			{{ receiverAddressDefault.receiver }}
+		</div>
+
+		<!-- Receiver Address -->
+		<div class="col-2" style="font-size:small; word-wrap: break-word;">
+			{{ receiverAddressDefault.receiverAddr }}
+		</div>
+
+		<!-- Receiver Telephone -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+			{{ receiverAddressDefault.receiverTel }}
+		</div>
+
+		<!-- Receiver IdImageFront -->
+		<div class="col-2 receiverIdImage" style="font-size:small; text-align: center; word-wrap: break-word;">
+			<a href="{{ receiverAddressDefault.receiverIdImageFront.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+		</div>
+
+		<!-- Receiver IdImageBack -->
+		<div class="col-2 receiverIdImage" style="font-size:small; text-align: center; word-wrap: break-word;">
+			<a href="{{ receiverAddressDefault.receiverIdImageBack.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+		</div>
+
+	</div>
+	
+	<hr style="padding: 0px; margin: 0px;"/>
+	
+	<!-- Button to User Info Centre -->
+	<div class="container" >
+		<div style="text-align: right;" >
+			{% csrf_token %}
+			<a href="{% url 'user:user' %}" class="btn updateDefaultAddress" id="">去会员中心修改</a>
+		</div>
+	</div>
+
+</div>
+
+
+<!-- Title of section -->
+<div class="container" style="padding: 20px">
+	<span style="font-size: 24px; font-weight: bolder;">支付方式</span>
+</div>
+
+
+<!-- Payment method -->
+<div class="container border d-flex align-items-center" style="padding-top: 20px; padding-bottom: 20px;">
+
+	<input type="radio" name="payStyle" value="1" checked>
+	<img class="img-fluid" alt="WechatPAY/aliPAY" style="height: 60px; padding-right: 30px;" src="{% static 'images/aliPayandWeChatPay.jpeg' %}">
+	
+	
+	<input type="radio" name="payStyle" value="2">
+	<img class="img-fluid" alt="VISA/Master" style="height: 60px; padding-right: 30px;" src="{% static 'images/visaMasterPay.png' %}">
+
+
+	<input type="radio" name="payStyle" value="3">
+	<span style="font-size: 32px; font-weight: bold; margin-left: 10px;">银行转账</span>
+
+</div>
+
+
+<!-- Title of section -->
+<div class="container" style="padding: 20px">
+	<span style="font-size: 24px; font-weight: bolder;">物流分箱拆分表</span>
+</div>
+
+
+<!-- Logistics Tables with option of AuExpress and EWE -->
+<div class="container logisticsTable border">
+
+	<!-- Button and logistics options -->
+	<button class="btn actionButton active" data-action="setAuExpress">澳邮</button>
+	<button class="btn actionButton" data-action="setEWE">EWE</button>
+
+	<!-- For AuExpress -->
+	<div class="content" id="content-setAuExpress">
+
+		<input type="hidden" id="parcelPackagingTableAuExpress" value="{{ parcelPackagingTableAuExpress }}">
+		<input type="hidden" id="parcelIdandSkuIdandAddOnServiceIdsListAuExpress" value="{{ parcelIdandSkuIdandAddOnServiceIdsListAuExpress }}">
+		<input type="hidden" id="totalSkuQtyAuExpress" value="{{ totalSkuQtyAuExpress }}">
+		<input type="hidden" id="totalSkuPriceAuExpress" value="{{ totalSkuPriceAuExpress }}">
+		<input type="hidden" id="totalPostageAuExpress" value="{{ totalPostageAuExpress }}">
+		<input type="hidden" id="totalPayAuExpress" value="{{ totalPayAuExpress }}">
+
+		<!-- Package Details -->
+		<div class="container parcelPackagingDetails">
+			{% for parcelPackagingId, parcelPackagingContent in parcelPackagingTableAuExpress.items %}
+
+			<div class="row parcelPackaging justify-content-center align-items-center">
+				
+				<!-- Box Index -->
+				<div class="col-2 d-flex justify-content-center align-items-center" style="background-color: #1f216d; color: white; height: 100%;">
+					第 {{ parcelPackagingId }} 箱
+				</div>
+				
+				<!-- Product in the box -->
+				<div class="col-7 parcelPackagingContent" style="height: 100%; background-color: lightgray; color: black;">
+
+					{% for countInParcelAndSkuName in parcelPackagingContent.countInParcelAndSkuNameList %}
+					<div class="row" style="margin: 5px 0px 5px 0px;">
+						{{ countInParcelAndSkuName.0 }} x {{ countInParcelAndSkuName.1 }}
+					</div>
+					{% endfor %}
+
+				</div>
+
+				<!-- Quantity of product, approx. weight and postage per box -->
+				<div class="col-3 d-flex justify-content-center align-items-center" style="height: 100%; background-color:gray; color: white;">
+					<div>{{ parcelPackagingContent.productCountInParcelList }} 件 (约 {{ parcelPackagingContent.parcelWeight }} kg)</div>
+					
+					<div>运费: {{ parcelPackagingContent.parcelPostage }}</div>
+				</div>
+
+			</div>
+			<p style="margin: 10px 0px;"></p>
+			{% endfor %}
+		</div>
+		
+		<hr style="margin-top: 30px;"/>
+
+		<!-- Summary section -->
+		<div class="container">
+			<span style="font-size: 24px; font-weight: bolder;">总金额结算</span>
+			<div class="">
+				<div class="">
+					<div class="" style="text-align: right;">共
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<em>{{ totalSkuQtyAuExpress }}</em>
+						</span>
+						件商品，总金额
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>{{ totalSkuPriceAuExpress }}元</b>
+						</span>
+					</div>
+					<div class="transit" style="text-align: right;">运费：
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>{{ totalPostageAuExpress }}元</b>
+						</span>
+					</div>
+					<div class="total_pay" style="text-align: right;">实付款：
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>{{ totalPayAuExpress }}元</b>
+						</span>
+					</div>
+				</div>
+			</div>	
+		</div>
+	</div>
+
+	<!-- For EWE -->
+	<div class="content" id="content-setEWE" style="display: none;">
+
+		<input type="hidden" id="parcelPackagingTableEWE" value="{{ parcelPackagingTableEWE }}">
+		<input type="hidden" id="parcelIdandSkuIdandAddOnServiceIdsListEWE" value="{{ parcelIdandSkuIdandAddOnServiceIdsListEWE }}">
+		<input type="hidden" id="totalSkuQtyEWE" value="{{ totalSkuQtyEWE }}">
+		<input type="hidden" id="totalSkuPriceEWE" value="{{ totalSkuPriceEWE }}">
+		<input type="hidden" id="totalPostageEWE" value="{{ totalPostageEWE }}">
+		<input type="hidden" id="totalPayEWE" value="{{ totalPayEWE }}">
+
+		<!-- Package Details -->
+		<div class="container parcelPackagingDetails">
+			{% for parcelPackagingId, parcelPackagingContent in parcelPackagingTableEWE.items %}
+
+			<div class="row parcelPackaging justify-content-center align-items-center">
+				
+				<!-- Box Index -->
+				<div class="col-2 d-flex justify-content-center align-items-center" style="background-color: #1f216d; color: white; height: 100%;">
+					第 {{ parcelPackagingId }} 箱
+				</div>
+				
+				<!-- Product in the box -->
+				<div class="col-7 parcelPackagingContent" style="height: 100%; background-color: lightgray; color: black;">
+
+					{% for countInParcelAndSkuName in parcelPackagingContent.countInParcelAndSkuNameList %}
+					<div class="row" style="margin: 5px 0px 5px 0px;">
+						{{ countInParcelAndSkuName.0 }} x {{ countInParcelAndSkuName.1 }}
+					</div>
+					{% endfor %}
+
+				</div>
+
+				<!-- Quantity of product, approx. weight and postage per box -->
+				<div class="col-3 d-flex justify-content-center align-items-center" style="height: 100%; background-color:gray; color: white;">
+					<div>{{ parcelPackagingContent.productCountInParcelList }} 件 (约 {{ parcelPackagingContent.parcelWeight }} kg)</div>
+					
+					<div>运费: {{ parcelPackagingContent.parcelPostage }}</div>
+				</div>
+
+			</div>
+			<p style="margin: 10px 0px;"></p>
+			{% endfor %}
+		</div>
+
+		<hr style="margin-top: 30px;"/>
+
+		<!-- Summary section -->
+		<div class="container">
+			<span style="font-size: 24px; font-weight: bolder;">总金额结算</span>
+			<div class="">
+				<div class="">
+					<div class="" style="text-align: right;">共
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<em>{{ totalSkuQtyEWE }}</em>
+						</span>
+						件商品，总金额
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>{{ totalSkuPriceEWE }}元</b>
+						</span>
+					</div>
+					<div class="transit" style="text-align: right;">运费：
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>{{ totalPostageEWE }}元</b>
+						</span>
+					</div>
+					<div class="total_pay" style="text-align: right;">实付款：
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>{{ totalPayEWE }}元</b>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Submit button -->
+<div class="container">
+	<div style="text-align: right;">
+		{% csrf_token %}
+		<a href="javascript:;" class="btn submitButton" id="orderBtn">提交订单</a>
+	</div>	
+</div>
+{% endblock body %}
+
+{% block bottomfiles %}
+<!-- Pop up message box -->
+<div class="popupContainer" style="display: none;">
+	<div class="popup d-flex justify-content-center align-items-center" 
+		 style="width:300px; 
+				height:150px; 
+				border:2px solid #dddddd; 
+				border-top:2px solid #1f216d; 
+				background-color:#f7f7f7;
+				position:fixed;
+				left:50%;
+				margin-left:-150px;
+				top:50%;
+				margin-top:-75px;">
+		<p style="font-size: 24px; font-weight: bolder; color: #1f216d;">订单提交成功！</p>
+	</div>
+	<div class="mask"></div>
+</div>
+
+<input type="hidden" id="skuIds" value="{{ skuIds|safe }}">
+<input type="hidden" id="skuCountList" value="{{ skuCountList|safe }}">
+<input type="hidden" id="skuIdandAddOnServiceIdsList" value="{{ skuIdandAddOnServiceIdsList|safe }}">
+<input type="hidden" id="totalServiceQty" value="{{ totalServiceQty }}">
+<input type="hidden" id="totalServicePrice" value="{{ totalServicePrice }}">
+<input type="hidden" id="totalLogisticsWeight" value="{{ totalLogisticsWeight }}">
+
+<script type="text/javascript" src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
+<script type="text/javascript">
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// To set the "row" heigh to the maximum of the column height within the row
+	$('.container.parcelPackagingDetails').ready(function() {
+		var divHeight = 0
+		$('.parcelPackagingContent').each(function () {
+			divHeight = Math.max($(this).height(), divHeight)
+		})
+		$('.parcelPackaging').css('height', divHeight+'px');
+	}); 
+
+	$(document).ready(function() {
+        // Find all rows within the container
+        var rows = $(".addressTable .row");
+
+        // Calculate the maximum height among all rows
+        var maxHeight = Math.max.apply(null, rows.map(function() {
+            return $(this).height();
+        }).get());
+
+        // Set the maximum height to all rows
+        rows.height(maxHeight + 20);
+    });
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// To show different logistic packaging content
+	$('.container.logisticsTable').ready(function() {
+
+		// To show the content associated with Button AuExpress
+		function showButtonAuExpressContent() {
+			$('.content').hide();
+			$('#content-setAuExpress').show();
+		}
+
+		// To handle button click events for Button "AuExpress" and Button "EWE"
+		$('.actionButton').on('click', function() {
+
+			// To remove the 'active' class from all buttons
+			$('.actionButton').removeClass('active');
+
+			// To add the 'active' class to the clicked button
+			$(this).addClass('active');
+
+			// To get the action identifier from the data-action attribute of the clicked button
+			var action = $(this).data('action');
+
+			// To show the content associated with the clicked button and hide other content
+			$('.content').hide();
+			$('#content-' + action).show(); 
+
+		});
+
+		showButtonAuExpressContent()
+
+	})
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// To post orderCommit
+	$('#orderBtn').click(function(event) {
+		event.preventDefault(); // Prevent default form submission behavior
+
+		// To select the sender address ID, receiver address ID, payment method
+		csrf = $('input[name="csrfmiddlewaretoken"]').val()
+		senderAddressId = $('#senderAddressId').val();
+		receiverAddressId = $('#receiverAddressId').val();
+		paymentMethod = $('input[name="payStyle"]:checked').val()
+		
+
+		skuIds = $('#skuIds').val();
+		skuCountList = $('#skuCountList').val();
+		skuIdandAddOnServiceIdsList = $('#skuIdandAddOnServiceIdsList').val();
+		totalServiceQty = $('#totalServiceQty').val();
+		totalServicePrice = $('#totalServicePrice').val();
+		totalLogisticsWeight = $('#totalLogisticsWeight').val();
+		
+
+		if ($('#content-setAuExpress').is(':visible')) {
+
+			// Button setAuExpress content is visible, so get values for AuExpress
+			logisticsCompanyName = "AuExpress";
+
+			parcelPackagingTable = $('#parcelPackagingTableAuExpress').val();
+			parcelIdandSkuIdandAddOnServiceIdsList = $('#parcelIdandSkuIdandAddOnServiceIdsListAuExpress').val();
+			
+			totalSkuQty = $('#totalSkuQtyAuExpress').val();
+			totalSkuPrice = $('#totalSkuPriceAuExpress').val();
+			totalPostage = $('#totalPostageAuExpress').val();
+			totalPay = $('#totalPayAuExpress').val();
+
+      	} else if ($('#content-setEWE').is(':visible')) {
+			
+			// Button setEWE content is visible, so get values for Button EWE
+			logisticsCompanyName = "EWE";
+			
+			parcelPackagingTable = $('#parcelPackagingTableEWE').val();
+			parcelIdandSkuIdandAddOnServiceIdsList = $('#parcelIdandSkuIdandAddOnServiceIdsListEWE').val();
+
+			totalSkuQty = $('#totalSkuQtyEWE').val();
+			totalSkuPrice = $('#totalSkuPriceEWE').val();
+			totalPostage = $('#totalPostageEWE').val();
+			totalPay = $('#totalPayEWE').val();
+      	
+		}
+
+		params = {
+					'csrfmiddlewaretoken': csrf,
+					
+					'skuIds': skuIds,
+					'skuCountList': skuCountList,
+					
+					'senderAddressId': senderAddressId,
+					'receiverAddressId': receiverAddressId,
+					'paymentMethod': paymentMethod,
+					
+					'logisticsCompanyName': logisticsCompanyName,
+					'skuIdandAddOnServiceIdsList': skuIdandAddOnServiceIdsList,
+					'parcelPackagingTable': parcelPackagingTable,
+					'parcelIdandSkuIdandAddOnServiceIdsList': parcelIdandSkuIdandAddOnServiceIdsList,
+
+					'totalSkuQty': totalSkuQty, 
+					'totalSkuPrice': totalSkuPrice,
+
+					'totalServiceQty': totalServiceQty,
+					'totalServicePrice': totalServicePrice,
+
+					'totalLogisticsWeight': totalLogisticsWeight,
+					'totalPostage': totalPostage,
+
+					'totalPay': totalPay
+				}
+		
+		$.post('/order/commit', params, function (data) {
+			if (data.res == 8){
+
+                    // 创建成功
+                    localStorage.setItem('orderFinish',2);
+                    $('.popupContainer').fadeIn('fast', function() {
+
+                        setTimeout(function(){
+                            $('.popupContainer').fadeOut('fast',function(){
+                                window.location.href = '/user/order/1';
+                            });
+                        },3000)
+
+                    });
+                }
+                else{
+                    alert(data.errmsg)
+                }
+		})
+	});
+
+</script>
+{% endblock bottomfiles %}

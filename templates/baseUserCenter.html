@@ -1,0 +1,66 @@
+{% extends 'baseNoCart.html' %}
+
+
+{% block title %}爱优品礼品店-用户中心{% endblock title %}
+
+
+{% block pageTitle %}用户中心{% endblock pageTitle %}
+
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-3 col-md-4">
+            <div class="d-flex flex-column flex-shrink-0" style="margin-left: 56.5px;">
+            <a href="/" class="text-decoration-none" style="color: black;">
+                <span class="d-flex justify-content-center align-items-center" style="font-size: medium;">
+                    <span class="fa-solid fa-user-group fa-lg" style="margin-right: 8px;"></span>
+                    会员中心
+                </span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li>
+                    <a href="{% url 'user:user' %}" {% if page == 'user' %} class="nav-link active" style="background-color: #1f216d; color: white;" {% else %} class="nav-link" style="color: black;"  {% endif %}  style="text-align: center; margin: 0px; padding: 16px 0px;" aria-current="page">
+                        <span class="d-flex justify-content-center align-items-center" style="font-size: medium;">
+                            <span class="fa-solid fa-user fa-lg" style="margin-right: 8px;"></span>
+                            个人信息
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'user:order' 1 %}" {% if page == 'order' %} class="nav-link active" style="background-color: #1f216d; color: white;" {% else %} class="nav-link" style="color: black;"  {% endif %} class="nav-link" style="text-align: center; margin: 0px; padding: 16px 0px;" aria-current="page">
+                        <span class="d-flex justify-content-center align-items-center" style="font-size: medium;">
+                            <span class="fa-solid fa-file-invoice-dollar fa-lg" style="margin-right: 8px;"></span>
+                            我的订单
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'user:senderAddress' %}" {% if page == 'senderAddress' %} class="nav-link active" style="background-color: #1f216d; color: white;" {% else %} class="nav-link" style="color: black;"  {% endif %} class="nav-link" style="text-align: center; margin: 0px; padding: 16px 0px;" aria-current="page">
+                        <span class="d-flex justify-content-center align-items-center" style="font-size: medium;">
+                            <span class="fa-solid fa-address-book fa-lg" style="margin-right: 8px;"></span>
+                            寄件人库
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'user:receiverAddress' %}" {% if page == 'receiverAddress' %} class="nav-link active" style="background-color: #1f216d; color: white;" {% else %} class="nav-link" style="color: black;"  {% endif %} class="nav-link" style="text-align: center; margin: 0px; padding: 16px 0px;" aria-current="page">
+                        <span class="d-flex justify-content-center align-items-center" style="font-size: medium;">
+                            <span class="fa-solid fa-address-book fa-lg" style="margin-right: 8px;"></span>
+                            收件人库
+                        </span>
+                    </a>
+                </li>
+            </ul>
+            <hr>
+            </div>
+        </div>
+        <div class="col-lg-9 col-md-8">
+
+            {% block rightContent %}{% endblock rightContent %}
+
+        </div>
+    </div>
+</div>
+{% endblock body %}

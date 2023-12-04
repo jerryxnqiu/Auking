@@ -1,0 +1,372 @@
+{% extends 'baseNoCart.html' %}
+{% load static %}
+
+{% block title %}爱优品礼品店-订单详情{% endblock title %}
+{% block pageTitle %}订单详情{% endblock pageTitle %}
+{% block body %}
+
+<!-- Order details summary -->
+<div class="container" style="padding: 20px">
+    <span style="font-size: 24px; font-weight: bolder;">订单内容总览</span>
+</div>
+<div class="container contentHeader border">
+    <!-- Row 1: Tracking Information -->
+    <div class="row">
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">订单ID: </span><span>{{ orderId }}</span>
+            </p>
+        </div>
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">订单状态: </span>
+                
+                {% if orderInfo.orderStatus == 1 %}
+                <span style="color: red; font-weight: bold;">{{ orderInfo.statusName }}</span>
+                
+                {% elif orderInfo.orderStatus == 2 or order.orderStatus == 3 %}
+                <span style="color: orange; font-weight: bold;">{{ orderInfo.statusName }}</span>
+                
+                {% elif orderInfo.orderStatus == 4 or order.orderStatus == 5 %}
+                <span style="color: lightgrey; font-weight: bold;">{{ orderInfo.statusName }}</span>
+                
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Row 2: Payment -->
+    <div class="row">
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">支付方式: </span><span>{{ orderInfo.methodName }}</span>
+            </p>
+        </div>
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">支付编号: </span><span>{{ orderInfo.tradeNo }}</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Row 3: Parcels -->
+    <div class="row">
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">物流公司: </span><span>{{ orderLogistics.logisticsCompanyName }}</span>
+            </p>
+        </div>
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">包裹数量: </span><span>{{ orderLogistics.logisticsParcelCount }}</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Row 4: Products -->
+    <div class="row">
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">商品数量: </span><span>{{ orderInfo.totalSkuQty }}</span>
+            </p>
+        </div>
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">商品总价: </span><span>{{ orderInfo.totalSkuPrice }}</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Row 5: Add-on service -->
+    <div class="row">
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">附加服务数量: </span><span>{{ orderInfo.totalServiceQty }}</span>
+            </p>
+        </div>
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">附加服务总价: </span><span>{{ orderInfo.totalServicePrice }}</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Row 6: Logistics -->
+    <div class="row">
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">总重量: </span><span>{{ orderInfo.totalLogisticsWeight }}</span>
+            </p>
+        </div>
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">物流总价: </span><span>{{ orderInfo.totalLogisticsPrice }}</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Row 7: Order Notes and Total Price -->
+    <div class="row">
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">订单备注: </span><span>{{ orderInfo.orderNotes }}</span>
+            </p>
+        </div>
+        <div class="col">
+            <p style="margin: 8px 0px">
+                <span style="font-weight: bold;">订单总价: </span><span>{{ orderInfo.totalPrice }}</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Address table -->
+<div class="container" style="padding: 20px">
+    <span style="font-size: 24px; font-weight: bolder;">寄收件人信息</span>
+</div>
+<div class="container addressTable border">
+	<!-- Table header -->
+	<div class="row justify-content-center align-items-center border-bottom" style="font-size:large; font-weight: bolder; margin: 0px;">
+		
+		<!-- iSDefault Checkbox -->
+		<div class="col-2" style="text-align: center;">
+			
+		</div>
+
+		<!-- Receiver Name -->
+		<div class="col-2" style="text-align: center;">
+			姓名
+		</div>
+
+		<!-- Receiver Address -->
+		<div class="col-2" style="text-align: center;">
+			地址
+		</div>
+
+		<!-- Receiver Telephone -->
+		<div class="col-2" style="text-align: center;">
+			电话
+		</div>
+
+		<!-- Receiver Address -->
+		<div class="col-2" style="text-align: center;">
+			收件人身份证正面图片
+		</div>
+
+		<!-- Receiver Address -->
+		<div class="col-2" style="text-align: center;">
+			收件人身份证背面图片
+		</div>
+
+	</div>
+
+	<!-- Default Sender Address -->
+	<div class="row justify-content-center align-items-center border-bottom" style="margin: 0px;">
+		
+		<!-- Category -->
+		<div class="col-2" style="font-weight: bolder; text-align: center;">
+			<input type="hidden" id="senderAddressId" value="{{ senderAddressDefault.id }}">
+			寄件人
+		</div>
+
+		<!-- Sender Name -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+			{{ orderInfo.sender }}
+		</div>
+
+		<!-- Sender Address -->
+		<div class="col-2" style="font-size:small; word-wrap: break-word;">
+			{{ orderInfo.senderAddr }}
+		</div>
+
+		<!-- Sender Telephone -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+			{{ orderInfo.senderTel }}
+		</div>
+
+		<!-- Sender IdImageFront -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+		</div>
+
+		<!-- Sender IdImageBack -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+		</div>
+
+	</div>
+
+	<!-- Default Receiver Address -->
+	<div class="row justify-content-center align-items-center" style="margin: 0px;">
+		
+		<!-- Category -->
+		<div class="col-2" style="font-weight: bolder; text-align: center;">
+			<input type="hidden" id="receiverAddressId" value="{{ receiverAddressDefault.id }}">
+			收件人
+		</div>
+
+		<!-- Receiver Name -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+			{{ orderInfo.receiver }}
+		</div>
+
+		<!-- Receiver Address -->
+		<div class="col-2" style="font-size:small; word-wrap: break-word;">
+			{{ orderInfo.receiverAddr }}
+		</div>
+
+		<!-- Receiver Telephone -->
+		<div class="col-2" style="font-size:small; text-align: center;">
+			{{ orderInfo.receiverTel }}
+		</div>
+
+		<!-- Receiver IdImageFront -->
+		<div class="col-2 receiverIdImage" style="font-size:small; text-align: center; word-wrap: break-word;">
+            <a href="{{ orderInfo.receiverAddress.receiverIdImageFront.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+		</div>
+
+		<!-- Receiver IdImageBack -->
+		<div class="col-2 receiverIdImage" style="font-size:small; text-align: center; word-wrap: break-word;">
+            <a href="{{ orderInfo.receiverAddress.receiverIdImageBack.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+		</div>
+
+	</div>
+</div>
+
+<!-- Parcel and item table -->
+<div class="container" style="padding: 20px">
+    <span style="font-size: 24px; font-weight: bolder;">包裹与物品信息</span>
+</div>
+
+{% for parcelPackagingId, parcelPackagingContent in parcelPackagingandAddOnServiceDict.items %}
+<div class="container parcelandContentTable border" style="margin-bottom: 40px;">
+        
+    <!-- Parcel header information -->
+    <div class="container">
+        <div class="row">
+            <p style="font-size: 16px; margin: 4px 0px">
+                第 <span style="font-weight: bold; padding: 0px; margin: 0px;">{{ parcelPackagingId }}</span> 箱 / 
+                <span style="font-weight: bold; padding: 0px; margin: 0px;">{{ parcelPackagingContent.orderTrackingParcelSkuQty }}</span>件 / 
+                <span style="font-weight: bold; padding: 0px; margin: 0px;">{{ parcelPackagingContent.orderTrackingParcelParcelWeight }}</span>Kg
+            </p>
+            <p style="margin: 4px 0px">
+                <span style="padding: 0px; margin: 0px;">物流快递编号 {{ parcelPackagingContent.orderTrackingParcelTrackingId }}</span>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Header section -->
+    <div class="container text-center" style="padding: 0px 20px; color: white; background-color: grey;">
+        <div class="row justify-content-center align-items-center">
+            <!-- per parcel -->
+            <div class="col-10" style="margin: 0px; padding: 0px;">
+                <div class="row">
+
+                    <!-- per product -->
+                    <div class="col-2">
+                        <p style="padding: 0px; margin: 0px;">商品图片</p>
+                    </div>
+                    <div class="col-5">
+                        <p style="padding: 0px; margin: 0px;">商品名称</p>
+                    </div>
+                    <div class="col-5">
+                        <div class="row">
+
+                            <!-- per service -->
+                            <div class="col-8">
+                                <p style="padding: 0px; margin: 0px;">服务名称</p>
+                            </div>
+                            <div class="col-4">
+                                <p style="padding: 0px; margin: 0px;">服务图片</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <p style="padding: 0px; margin: 0px;">物流面单</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content section -->
+    <div class="container" style="padding: 0px 20px; font-size: small;">
+        <div class="row">
+            <!-- per parcel -->
+            <div class="col-10" style="margin: 0px; padding: 0px;">
+                {% for sku in parcelPackagingContent.skuList %}
+                <div class="row justify-content-center align-items-center">
+
+                    <!-- per product -->
+                    <div class="col-2 d-flex justify-content-center">
+                        <img src="{{ sku.image.url }}" style="width: 70%; margin: 5px 0px;">
+                    </div>
+                    <div class="col-5">
+                        {{ sku.name }}
+                    </div>
+                    <div class="col-5">
+                        <div class="row">
+                            <div class="col-8">
+                                {% for addOnServices in sku.orderProductandServiceMappingSkuItem %}
+                                <p style="margin: 0px; padding: 10px;">{{ addOnServices.serviceName }}</p>
+                                {% endfor %}
+                            </div>
+                            <div class="col-4">
+                                {% for addOnServices in sku.orderProductandServiceMappingSkuItem %}
+                                {% if addOnServices.serviceImage == "(待补充)" or addOnServices.serviceImage == "无服务" %}
+                                <p style="margin: 0px; padding: 10px; text-align: center;">{{ addOnServices.serviceImage }}</p>
+                                {% else %}
+                                <div class="d-flex justify-content-center align-items-center orderDetails" style="align-items: center;">
+                                    <p style="margin: 0px; padding: 10px;">
+                                        <a href="{{ addOnServices.serviceImage.url }}" target="_blank" style="text-decoration: none;"><em>看图片</em></a>
+                                    </p>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if not forloop.last %}
+                    <hr style="padding: 0px; margin: 4px 0px;">
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-2 d-flex justify-content-center align-items-center" style="text-align: center; margin: 0px; padding: 0px;">
+                {% if parcelPackagingContent.orderTrackingParcelTrackingImage == "(待补充)" %}
+                <p style="margin: 0px; padding: 10px;">{{ parcelPackagingContent.orderTrackingParcelTrackingImage }}</p>
+                {% else %}
+                <div class="d-flex justify-content-center align-items-center orderDetails" style="align-items: center;">
+                    <p style="margin: 0px; padding: 10px;">
+                        <a href="{{ parcelPackagingContent.orderTrackingParcelTrackingImage.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endfor %}
+
+{% endblock body %}
+
+{% block bottomfiles %}
+<script type="text/javascript" src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
+<script type="text/javascript">
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+	// To set the "row" heigh to the maximum of the column height within the row
+    $(document).ready(function() {
+        // To find all rows within the container
+        var rows = $(".addressTable .row");
+
+        // Calculate the maximum height among all rows
+        var maxHeight = Math.max.apply(null, rows.map(function() {
+            return $(this).height();
+        }).get());
+
+        // Set the maximum height to all rows
+        rows.height(maxHeight + 20);
+    });
+</script>
+{% endblock bottomfiles %}

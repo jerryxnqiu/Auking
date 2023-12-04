@@ -1,0 +1,466 @@
+{% extends 'baseNoCart.html' %}
+{% load static %}
+
+{% block title %}爱优品礼品店-购物车{% endblock title %}
+{% block pageTitle %}购物车{% endblock pageTitle %}
+
+{% block body %}
+<!-- Header section -->
+<div class="container" style="color: white; background-color: grey;">
+    <div class="container text-center" style="padding: 0px 20px; color: white; background-color: grey;">
+        <div class="row justify-content-center align-items-center">
+            <div class="col-1">
+            </div>
+            <div class="col-5">
+                <p style="padding: 0px; margin: 0px;">商品名称</p>
+            </div>
+            <div class="col-1">
+                <p style="padding: 0px; margin: 0px;">商品单位</p>
+            </div>
+            <div class="col-1">
+                <p style="padding: 0px; margin: 0px;">商品价格</p>
+            </div>
+            <div class="col-2">
+                <p style="padding: 0px; margin: 0px;">数量</p>
+            </div>
+            <div class="col-1">
+                <p style="padding: 0px; margin: 0px;">小计</p>
+            </div>
+            <div class="col-1">
+                <p style="padding: 0px; margin: 0px;">操作</p>
+            </div>
+        </div>
+    </div> 
+</div>
+
+
+<!-- Content section -->
+<div class="container border">
+    <form id="orderSubmitForm" method="post" action="{% url 'order:orderPlace' %}">
+    <!-- Main Content section -->
+    <div class="container text-center" style="padding: 0px 20px;">
+        
+        {% for sku in skus %}
+        <div class="row shoppingCartList justify-content-center align-items-center" style="font-size:small;">
+            <!-- Product Checkbox -->
+            <div class="col-1">
+                <input type="checkbox" name="skuIdandAddOnServiceIds" value="{{ sku.skuIdandAddOnServiceIds }}" checked>
+            </div>
+
+            <!-- Product Picture and Name -->
+            <div class="col-5" style="text-align: center;">
+                <div class="row">
+                    <div class="col-lg-4 col-xl-3">
+                        <img style="height: 100px;" src="{{ sku.image.url }}">
+                    </div>
+                    <div class="col-lg-8 col-xl-9 d-flex align-items-center">
+                        <ul class="text-start" style="padding-left: 0px;">
+                            <li style="list-style: none; font-weight: bold;">{{ sku.name }}</li>
+                            <ul>
+                            {% for addOnService in sku.addOnServices%}
+                                <li style="font-size: small; font-style: italic;">{{ addOnService.name }}</li>
+                            {% endfor %}
+                            </ul>
+                        </ul>                    
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Unit -->
+            <div class="col-1">
+                <p style="padding: 0px; margin: 0px;">{{ sku.unit }}</p>
+            </div>
+
+            <!-- Product Price -->
+            <div class="productPrice col-1">
+                <p style="padding: 0px; margin: 0px;">{{ sku.price }}</p>
+            </div>
+
+            <!-- Quantity adjustment -->
+            <div class="col-2 d-flex align-items-center justify-content-center">
+                <p style="padding: 0px; margin: 0px;">
+                    <div class="num_add d-flex justify-content-center" style="text-align: center;">
+                        <a href="javascript:;" class="minus border" style="text-decoration: none; padding: 4px 8px 4px 8px; margin-right: 4px;">-</a>	
+                        <input type="text" class="numShow rounded border" style="text-align: center; " size="4" skuAddOnServicesIds="{{ sku.addOnServicesIds }}" skuId="{{ sku.id }}" value="{{ sku.count }}">
+                        <a href="javascript:;" class="add border" style="text-decoration: none; padding: 4px 8px 4px 8px; margin-left: 4px;">+</a>
+                    </div>
+                </p>
+            </div>
+
+            <!-- Product Value -->
+            <div class="amount_show col-1">
+                <p style="padding: 0px; margin: 0px;">$ {{ sku.amount }} 澳元</p>
+            </div>
+
+            <!-- Product Delete -->
+            <div class="productDelete col-1">
+                <p style="padding: 0px; margin: 0px;">
+                    <a href="javascript:;">
+                        删除
+                    </a>
+                </p>
+            </div>
+            <hr style="padding: 0px; margin: 10px 0px;">
+        </div>
+        
+        {% endfor %}
+
+    </div>
+
+    <!-- Summary section -->
+    {% csrf_token %}
+    <div class="container settlements text-center" style="padding: 0px 20px;">
+        <div class="row justify-content-center align-items-center">
+            
+            <!-- Select All box -->
+            <div class="col-1">
+                <input type="checkbox" name="skuIds" checked="">
+            </div>
+            <div class="col-1 d-flex">
+                <p style="padding: 0px; margin: 0px;">全选</p>
+            </div>
+
+            <!-- Summary -->
+            <div class="col-xl-8 col-md-7">
+                合计(不含运费)
+                <span style="color: red; font-weight: bolder; font-size: 24px;">
+                    ¥<em>{{ totalPrice }}</em>
+                </span>
+                <br>
+                共计 <b style="color: red; font-weight: bolder; font-size: 24px;">{{ totalCount }}</b> 件商品
+            </div>
+
+            <!-- To checkout -->
+            <div class="col-xl-2 col-md-3">
+                <input class="btn cartSubmit" type="submit" value="去结算">
+            </div>
+        </div>
+    </div>
+</div>
+
+</form>
+{% endblock body %}
+
+{% block bottomfiles %}
+<script type="text/javascript" src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
+<script type="text/javascript">
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To calculate the total quantity and price of selected products
+    function updatePageInfo() {
+
+        // To get all products that are checked in checkbox
+        // To get the 获取所有被选中的商品所在的ul元素
+        totalCount = 0
+        totalPrice = 0
+
+        $('.shoppingCartList').find(':checked').parents('div.shoppingCartList').each(function () {
+            // To get the product quantity and subtotal
+            count = $(this).find('.numShow').val()
+            amount = $(this).children('.amount_show').text()
+
+            // To accumulate the product quantity and subtotal
+            count = parseInt(count)
+            amount = parseFloat(amount)
+            totalCount += count
+            totalPrice += amount
+        })
+
+        // To set the product quantity and total price with check mark on
+        $('.settlements').find('em').text(totalPrice.toFixed(2))
+        $('.settlements').find('b').text(totalCount)
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To calculate product price subtotal
+    function updateProductsAmount(sku_shoppingCartList) {
+        // To get the product price and quantity
+        price = sku_shoppingCartList.children('.productPrice').text()
+        count = sku_shoppingCartList.find('.numShow').val()
+        
+        // To calculate the product price subtotal
+        amount = parseInt(count)*parseFloat(price)
+        
+        // To set the product price subtotal
+        sku_shoppingCartList.children('.amount_show').text(amount.toFixed(2)+'元')
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To check all or uncheck all product
+    $('.settlements').find(':checkbox').change(function () {
+        // To get all the "checked" items
+        is_checked = $(this).prop('checked')
+        
+        // To find all the checkbox, and make sure they are aligned with the "checked" items
+        $('.shoppingCartList').find(':checkbox').each(function () {
+            $(this).prop('checked', is_checked)
+        })
+        // To update the page information
+        updatePageInfo()
+    })
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To set the "select all" checkbox status, when a product checkbox status is changed
+    $('.shoppingCartList').find(':checkbox').change(function () {
+        // To get the product quantity on the shopping cart list
+        all_len = $('.shoppingCartList').length
+        
+        // To get the product quantity where checkbox is checked
+        checked_len = $('.shoppingCartList').find(':checked').length
+        is_checked = true
+        if (checked_len < all_len){
+            is_checked = false
+        }
+        $('.settlements').find(':checkbox').prop('checked', is_checked)
+        
+        // To update the page information
+        updatePageInfo()
+    })
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To update the product quantity in shopping cart
+    errorUpdate = false
+    total = 0
+    function updateRemoteCartInfo(skuIdandAddOnServiceIds, count) {
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+        // To group parameters
+        params = {'skuIdandAddOnServiceIds':skuIdandAddOnServiceIds, 'count':count, 'csrfmiddlewaretoken':csrf}
+        
+        // To set the ajax request setting to "sync"
+        $.ajaxSettings.async = false
+
+        // Send "ajax post" request，visit "/cart/update", pass parameters: skuIdandAddOnServiceIds count
+        // By default, ajax request is async, and will not wait for the callback function to execute
+        $.post('/cart/update', params, function (data) {
+            if (data.res == 5){
+                // Update successful
+                errorUpdate = false
+                total = data.totalCount
+            }
+            else{
+                // Update failure
+                errorUpdate = true
+                alert(data.errmsg)
+            }
+        })
+        
+        // To set the ajax request setting to "async"
+        $.ajaxSettings.async = true
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To increase product quantity in the shopping cart
+    $('.add').click(function () {
+        // To get product ID and quantity
+        skuId = $(this).prev().attr('skuId')
+        skuAddOnServicesIds = $(this).prev().attr('skuAddOnServicesIds')
+        count = $(this).prev().val()
+
+        // To prepare parameters
+        // To construct new skuId with service options
+        skuIdandAddOnServiceIds = skuId
+        skuAddOnServicesIdsList = skuAddOnServicesIds.split("'")
+
+        $.each(skuAddOnServicesIdsList, function(index, value) {
+            if (index % 2 === 1) {
+                skuIdandAddOnServiceIds = skuIdandAddOnServiceIds + "_" + skuAddOnServicesIdsList[index]
+            }
+        });
+
+        count = parseInt(count)+1
+
+        // To update the shopping cart information
+        updateRemoteCartInfo(skuIdandAddOnServiceIds, count)
+
+        // To check if the update is successful
+        if (errorUpdate == false){
+            // To update the product quantity
+            $(this).prev().val(count)
+
+            // To update the product subtotal
+            updateProductsAmount($(this).parents('div.shoppingCartList'))
+
+            // To get the checkbox status of product, if it is checked
+            // update the page information
+            is_checked = $(this).parents('div.shoppingCartList').find(':checkbox').prop('checked')
+            if (is_checked){
+                // To update the page information
+                updatePageInfo()
+            }
+            
+            // To update the total product quantity on the webpage
+            $('.totalCount').children('em').text(total)
+        }
+    })
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To decrease product quantity in the shopping cart
+    $('.minus').click(function () {
+        // To get product ID and quantity
+        skuId = $(this).next().attr('skuId')
+        skuAddOnServicesIds = $(this).next().attr('skuAddOnServicesIds')
+        count = $(this).next().val()
+
+        // To prepare parameters
+        // To construct new skuId with service options
+        skuIdandAddOnServiceIds = skuId
+        skuAddOnServicesIdsList = skuAddOnServicesIds.split("'")
+
+        $.each(skuAddOnServicesIdsList, function(index, value) {
+            if (index % 2 === 1) {
+                skuIdandAddOnServiceIds = skuIdandAddOnServiceIds + "_" + skuAddOnServicesIdsList[index]
+            }
+        });
+
+        // To verify the parameter: 
+        count = parseInt(count)-1
+        if (count <= 0){
+            return
+        }
+
+        // To update the shopping cart information
+        updateRemoteCartInfo(skuIdandAddOnServiceIds, count)
+
+        // To check if the update is successful
+        if (errorUpdate == false){
+            // To update the product quantity
+            $(this).next().val(count)
+
+            // To update the product subtotal
+            updateProductsAmount($(this).parents('div.shoppingCartList'))
+
+            // To get the checkbox status of product, if it is checked
+            // update the page information
+            is_checked = $(this).parents('div.shoppingCartList').find(':checkbox').prop('checked')
+            if (is_checked){
+                // To update the page information
+                updatePageInfo()
+            }
+            
+            // To update the total product quantity on the webpage
+            $('.totalCount').children('em').text(total)
+        }
+    })
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To record the previous product quantity
+    preCount = 0
+    $('.numShow').focus(function () {
+        preCount = $(this).val()
+    })
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To input the product quantity manually
+    $('.numShow').blur(function () {
+        // To get product ID and quantity
+        skuId = $(this).attr('skuId')
+        skuAddOnServicesIds = $(this).attr('skuAddOnServicesIds')
+        count = $(this).val()
+
+        // To construct new skuId with service options
+        skuIdandAddOnServiceIds = skuId
+        skuAddOnServicesIdsList = skuAddOnServicesIds.split("'")
+
+        $.each(skuAddOnServicesIdsList, function(index, value) {
+            if (index % 2 === 1) {
+                skuIdandAddOnServiceIds = skuIdandAddOnServiceIds + "_" + skuAddOnServicesIdsList[index]
+            }
+        });
+
+        // To verify the parameter: 
+        if (isNaN(count) || count.trim().length==0 || parseInt(count)<=0){
+            // Set the product quantity to the value previously
+            $(this).val(preCount)
+            return
+        }
+
+        // To update the records in shopping cart
+        count = parseInt(count)
+        updateRemoteCartInfo(skuId, count)
+
+        // To check if the update is successful
+        if (errorUpdate == false){
+            // To update the product quantity
+            $(this).val(count)
+
+            // To update the product subtotal
+            updateProductsAmount($(this).parents('div.shoppingCartList'))
+
+            // To get the checkbox status of product, if it is checked
+            // update the page information
+            is_checked = $(this).parents('div.shoppingCartList').find(':checkbox').prop('checked')
+            if (is_checked){
+                // To update the page information
+                updatePageInfo()
+            }
+            
+            // To update the total product quantity on the webpage
+            $('.totalCount').children('em').text(total)
+        }
+        else{
+            
+            // Set the product quantity to the value previously
+            $(this).val(preCount)
+        }
+    })
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To delete a record in shopping cart
+    $('.shoppingCartList').children('.productDelete').click(function () {
+        // To get product ID and quantity
+        skuId = $(this).parents('div.shoppingCartList').find('.numShow').attr('skuId')
+        skuAddOnServicesIds = $(this).parents('div.shoppingCartList').find('.numShow').attr('skuAddOnServicesIds')
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+
+        // To construct new skuId with service options
+        skuIdandAddOnServiceIds = skuId
+        skuAddOnServicesIdsList = skuAddOnServicesIds.split("'")
+
+        console.log(skuAddOnServicesIdsList)
+
+        $.each(skuAddOnServicesIdsList, function(index, value) {
+            if (index % 2 === 1) {
+                skuIdandAddOnServiceIds = skuIdandAddOnServiceIds + "_" + skuAddOnServicesIdsList[index]
+            }
+        });
+
+        // To prepare parameters
+        params = {'skuIdandAddOnServiceIds':skuIdandAddOnServiceIds, 'csrfmiddlewaretoken':csrf}
+
+        // To get the parent tag element: div.shoppingCartList
+        skuDivShoppingCartList = $(this).parents('div.shoppingCartList')
+
+        // Send "ajax post" request， visit /cart/delete, pass parameters: skuId
+        $.post('/cart/delete', params, function (data) {
+            if (data.res == 3){
+                
+                // If delete succeeds, remove the "div.shoppingCartList" wrapping product
+                skuDivShoppingCartList.remove()
+                
+                // To get the checkbox status of product
+                is_checked = skuDivShoppingCartList.find(':checkbox').prop('checked')
+                if (is_checked){
+                    // To update the page information
+                    updatePageInfo()
+                }
+                
+                // To update the total product quantity on the webpage
+                $('.totalCount').children('em').text(data.totalCount)
+            }
+            else{
+                alert(data.errmsg)
+            }
+        })
+    })
+
+</script>
+{% endblock bottomfiles %}

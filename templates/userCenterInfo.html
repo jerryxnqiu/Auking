@@ -1,0 +1,40 @@
+{% extends 'baseUserCenter.html' %}
+
+{% load static %}
+
+{% block rightContent %}
+<div class="contain" style="margin-left: 30px;">
+	<div class="container">
+		<span style="font-size: 28px; font-weight: bolder;">基本信息</span>
+		<div class="row">
+			<li style="margin: 4px 0px;"><span>用户名：</span>{{ user.username }}</li>
+			<li style="margin: 4px 0px;"><span>注册邮箱：</span>{{ user.email }}</li>
+		</div>
+	</div>
+	<br>
+	<br>
+	<div class="container">
+		<span style="font-size: 28px; font-weight: bolder;">最近浏览商品</span>
+		<div class="row text-center justify-content-center align-items-center">
+			{% for sku in productList %}
+			<div class="col border d-flex justify-content-center" style="height: 160px; padding: 0px;">
+				<a class="" href="{% url 'product:detail' sku.id  %}" style="text-decoration:none;">
+					<div class="container d-flex justify-content-center align-items-center" style="height: 100px; width: 150px; padding-top: 5px;">
+						<img src="{{ sku.image.url }}" alt width="100px">
+					</div>
+					<div class="container d-flex justify-content-center align-items-center" style="height: 15px; width: 150px; padding-top: 5px;">
+						<div class="link-dark lh-1" style="font-size: small; font-weight: bold;">¥ {{ sku.price }}</div>
+						<img src="{% static 'images/shoppingCart.png' %}" style="padding-left: 3px; height: 15px;">
+					</div>
+					<div class="container d-flex justify-content-center align-items-center" style="height: 35px; width: 150px; padding: 5px 0px;">
+						<div class="link-dark lh-1" style="font-size: 11px;">{{ sku.name }}</div>
+					</div>
+				</a>
+			</div>
+			{% empty %}
+			<span style="font-style: italic;">无历史浏览记录</span>
+			{% endfor %}
+		</div>
+	</div>
+</div>
+{% endblock rightContent %}

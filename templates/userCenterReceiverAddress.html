@@ -1,0 +1,215 @@
+{% extends 'baseUserCenter.html' %}
+
+{% load static %}
+
+{% block rightContent %}
+<div class="contain" style="margin-left: 30px;">
+	<div class="container">
+		<span style="font-size: 24px; font-weight: bolder;">收件人信息库</span>
+		<div class="row justify-content-center align-items-center border-bottom" style="font-size:small; margin-top: 20px;">
+			
+			<!-- iSDefault Checkbox -->
+			<div class="col-1" style="text-align: center; padding: 0px; margin: 0px;">
+				默认地址
+			</div>
+
+			<!-- Receiver Name -->
+			<div class="col-2" style="text-align: center; padding: 0px; margin: 0px;">
+				收件人姓名*
+			</div>
+
+			<!-- Receiver Address -->
+			<div class="col-2" style="text-align: center; padding: 0px; margin: 0px;">
+				收件人地址*
+			</div>
+
+			<!-- Receiver Telephone -->
+			<div class="col-2" style="text-align: center; padding: 0px; margin: 0px;">
+				收件人电话*
+			</div>
+
+			<!-- Receiver Address -->
+			<div class="col-2" style="text-align: center; padding: 0px; margin: 0px;">
+				收件人身份证正面图片*
+			</div>
+
+			<!-- Receiver Address -->
+			<div class="col-2" style="text-align: center; padding: 0px; margin: 0px;">
+				收件人身份证背面图片*
+			</div>
+
+			<!-- If to Delete -->
+			<div class="col-1" style="text-align: center; padding: 0px; margin: 0px;">
+				是否删除
+			</div>
+
+		</div>
+	</div>
+	<!-- To manage the existing address book -->
+	<div class="container" style="padding: 0px;">
+		<form method="post">
+			{% csrf_token %}
+			{% for receiverAddress in receiverAddresses %}
+			<div class="receiverAddress row justify-content-center align-items-center border-bottom" style="font-size:small; margin: 0px;">
+				<!-- iSDefault Checkbox -->
+				<div class="isDefaultCheckBox col-1" style="text-align: center;">
+					<input type="checkbox" class="checkoption" name="{{ receiverAddress.id }}" {% if receiverAddress.isDefault %}checked{% endif %} value="{{ receiverAddress.isDefault }}">
+				</div>
+
+				<!-- Receiver Name -->
+				<div class="col-2" style="text-align: center;">
+					{{ receiverAddress.receiver }}
+				</div>
+
+				<!-- Receiver Address -->
+				<div class="col-2" style="word-wrap: break-word;">
+					{{ receiverAddress.receiverAddr }}
+				</div>
+
+				<!-- Receiver Telephone -->
+				<div class="col-2" style="text-align: center;">
+					{{ receiverAddress.receiverTel }}
+				</div>
+
+				<!-- Receiver IdImageFront -->
+				<div class="col-2" style="text-align: center; word-wrap: break-word;">
+					<img src="{{ receiverAddress.receiverIdImageFront.url }}" class="w-100">
+					
+				</div>
+
+				<!-- Receiver IdImageBack -->
+				<div class="col-2" style="text-align: center; word-wrap: break-word;">
+					<img src="{{ receiverAddress.receiverIdImageBack.url }}" class="w-100">
+				</div>
+
+				<!-- If to Delete -->
+				<div class="receiverAddressDelete col-1" style="text-align: center;">
+					<a href="javascript:;">
+						删除
+					</a>
+				</div>
+			</div>
+			{% endfor %}
+			<input class="btn updateDefaultAddress" type="submit" style="margin-top: 20px;" name="updateReceiverAddress" value="更新默认地址">
+		</form>
+	</div>
+
+	<hr style="margin: 30px 0px;"/>
+	
+	<!-- To add new address into the address book-->
+	<div class="container" style="padding: 0px;">
+		<span style="font-size: 24px; font-weight: bolder;">新增收件人信息</span>
+		<div class="row" style="margin-top: 20px;">
+			<form method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				<div class="container" style="height: 40px;">
+					<div class="row">
+						<div class="col-3" style="padding: 0px;">
+							<label>收件人姓名:</label>
+						</div>
+						<div class="col-9" style="padding: 0px;">
+							<input type="text" class="border-1 rounded" style="padding-left: 5px; width: 200px;" name="receiver" id="receiver">
+						</div>
+					</div>
+				</div>
+				<div class="container" style="height: 40px;">
+					<div class="row">
+						<div class="col-3" style="padding: 0px;">
+							<label>收件人地址:</label>
+						</div>
+						<div class="col-9" style="padding: 0px;">
+							<input type="text" class="border-1 rounded" style="padding-left: 5px; width: 200px;" name="receiverAddr" id="receiverAddr">
+						</div>
+					</div>
+				</div>
+				<div class="container" style="height: 40px;">
+					<div class="row">
+						<div class="col-3" style="padding: 0px;">
+							<label>收件人电话:</label>
+						</div>
+						<div class="col-9" style="padding: 0px;">
+							<input type="tel" class="border-1 rounded" style="padding-left: 5px; width: 200px;" name="receiverTel" id="receiverTel">
+						</div>
+					</div>
+				</div>
+				<div class="container" style="height: 40px;">
+					<div class="row">
+						<div class="col-3" style="padding: 0px;">
+							<label>收件人身份证正面图片:</label>
+						</div>
+						<div class="col-9" style="padding: 0px;">
+							<input type="file" class="border-1 rounded" style="padding-left: 5px;" name="receiverIdImageFront" id="receiverIdImageFront" accept="image/png, image/jpeg">
+						</div>
+					</div>
+				</div>
+				<div class="container" style="height: 40px;">
+					<div class="row">
+						<div class="col-3" style="padding: 0px;">
+							<label>收件人身份证背面图片:</label>
+						</div>
+						<div class="col-9" style="padding: 0px;">
+							<input type="file" class="border-1 rounded" style="padding-left: 5px;" name="receiverIdImageBack" id="receiverIdImageBack" accept="image/png, image/jpeg">
+						</div>
+					</div>
+				</div>
+				<div class="container">
+					<div class="row">
+						<div class="col-3" style="padding: 0px; margin: 0px;">
+							<input class="btn submiteNewAddress" type="submit" style="margin-top: 20px;" name="newReceiverAddress" value="提交">
+						</div>
+						<div class="col-4 d-flex align-items-center" style="padding: 0px; margin: 0px;">
+							<div style="font-size: large; font-style: italic; color: red;">{{ errmsg }}</div>
+						</div>
+						<div class="col-5">
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock rightContent %}
+
+{% block bottomfiles %}
+<script type="text/javascript" src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
+<script type="text/javascript">
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To make sure only one checkbox is selected
+	$('.receiverAddress').ready(function(){
+
+		$('.checkoption').click(function() {
+			$('.checkoption').not(this).prop('checked', false);
+		});
+
+	});
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To delete a record in address table
+    $('.receiverAddress').children('.receiverAddressDelete').click(function () {
+        // To get current product ID
+        receiverAddressId = $(this).parents('div.receiverAddress').find('.checkoption').attr('name')
+		csrf = $('input[name="csrfmiddlewaretoken"]').val()
+
+		// To prepare parameters
+		params = {'receiverAddressId':receiverAddressId, 'csrfmiddlewaretoken':csrf}
+
+        // To get the parent tag element: div.shoppingCartList
+        skuDivReceiverAddress = $(this).parents('div.receiverAddress')
+
+        // Send "ajax post" request， visit /cart/delete, pass parameters: skuId
+        $.post('/user/receiveraddress/delete', params, function (data) {
+            if (data.res == 2){
+                
+                // If delete succeeds, remove the "div.shoppingCartList" wrapping product
+                skuDivReceiverAddress.remove()
+				alert(data.message)
+                
+            }
+            else{
+                alert(data.errmsg)
+            }
+        })
+    })
+
+</script>
+{% endblock bottomfiles %}

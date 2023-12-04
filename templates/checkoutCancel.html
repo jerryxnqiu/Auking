@@ -1,0 +1,24 @@
+{% extends 'baseNoCart.html' %}
+{% load static %}
+
+{% block title %}爱优品礼品店-订单结算{% endblock title %}
+{% block pageTitle %}订单结算{% endblock pageTitle %}
+{% block body %}
+
+<div class="d-flex justify-content-center">
+	<div class="row align-items-center" style="padding: 100px;">
+        <div class="col">
+            <span style="font-size: 28px;">您已取消了对订单的付款，页面会在5秒后自动跳转到“我的订单”界面，谢谢。</span>
+        </div>
+    </div>
+</div>
+
+{% endblock body %}
+
+{% block bottomfiles %}
+<script>
+    setTimeout(function() {
+        window.location.href = "{% url 'user:order' 1 %}";
+    }, 5000);  
+</script>
+{% endblock bottomfiles %}

@@ -1,0 +1,15 @@
+{% extends 'baseNoCart.html' %}
+{% load static %}
+
+{% block title %}爱优品礼品店-订单详情{% endblock title %}
+{% block pageTitle %}订单详情{% endblock pageTitle %}
+{% block body %}
+
+<a href="{% url 'generate_pdf' %}" class="btn btn-primary">Generate PDF Receipt</a>
+
+
+{% endblock body %}
+
+{% block bottomfiles %}
+
+{% endblock bottomfiles %}

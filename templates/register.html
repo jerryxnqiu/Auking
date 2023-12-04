@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}爱优品礼品店-注册{% endblock title %}
+
+
+{% block body %}
+<div class="d-flex justify-content-center">
+	<div class="row align-items-center" style="padding-top: 200px;">
+		<div class="container border rounded justify-content-center">
+
+			<a href="{% url 'product:index' %}">
+				<img src="{% static 'images/aukingLogo.png' %}" alt width="300px">
+			</a>
+			<div class="container loginBtm justify-content-center" style="height: 40px; width: 276px;">
+				<div class="row align-items-end">
+					<div class="col">
+						<div style="font-weight: bolder; font-size: x-large;">用户注册</div>
+					</div>
+					<div class="col">
+						<a href="{% url 'user:login' %}">登录</a>
+					</div>
+				</div>
+			</div>
+			<div class="container">
+				<form method="post" action="/user/register">
+					{% csrf_token %}
+					<div class="container" style="height: 40px;">
+						<div class="row">
+							<div class="col">
+								<label>用户名:</label>
+							</div>
+							<div class="col">
+								<input type="text" class="border-1 rounded" style="padding-left: 5px" name="userName" id="userName">
+							</div>
+						</div>
+					</div>
+					<div class="container" style="height: 40px;">
+						<div class="row">
+							<div class="col">
+								<label>密码:</label>
+							</div>
+							<div class="col">
+								<input type="password" class="border-1 rounded" style="padding-left: 5px" name="pwd" id="pwd">
+							</div>
+						</div>
+					</div>
+					<div class="container" style="height: 40px;">
+						<div class="row">
+							<div class="col">
+								<label>确认密码:</label>
+							</div>
+							<div class="col">
+								<input type="password" class="border-1 rounded" style="padding-left: 5px" name="cpwd" id="cpwd">
+							</div>
+						</div>
+					</div>
+					<div class="container" style="height: 65px;">
+						<div class="row">
+							<div class="col">
+								<label>邮箱:</label>
+							</div>
+							<div class="col">
+								<input type="text" class="border-1 rounded" style="padding-left: 5px" name="email" id="email">
+							</div>
+						</div>
+						<div class="mt-1" style="font-size: small; font-style: italic; color: red;">{{ errmsg }}</div>
+					</div>
+					<div class="container" style="height: 40px;">
+						<input type="checkbox" name="agreement" id="agreement" checked="checked">
+						<label>同意”爱优品礼品店用户使用协议“</label>
+					</div>
+					<div class="container" style="height: 40px;">
+						<input type="submit" value="注 册" name="">
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock body %}
+{% block bottom %}{% endblock bottom %}

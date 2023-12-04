@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}爱优品礼品店-首页{% endblock title %}
+
+{% block body %}
+<style>
+    .btn-light {
+        --bs-btn-color: #fff;
+        --bs-btn-bg: #1f216d;
+        --bs-btn-border-color: #1f216d;
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: #1f216d;
+        --bs-btn-hover-border-color: #1f216d;
+        --bs-btn-focus-shadow-rgb: 49,132,253;
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: #1f216d;
+        --bs-btn-active-border-color: #1f216d;
+        --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+        --bs-btn-disabled-color: #fff;
+        --bs-btn-disabled-bg: #1f216d;
+        --bs-btn-disabled-border-color: #1f216d;
+        background-color:transparent;color: black;
+        }
+</style>
+
+
+<div class="container">
+    
+    <div class="breadcrumb">
+        <a href="{% url 'product:index' %}" class="link-dark" style="text-decoration: none;">全部分类</a>
+        <span class="ps-1 pe-1">></span>
+        <a href="{% url 'product:categoryList' categoryName=sku.category.nameEN page=1 %}" class="link-dark" style="text-decoration: none;"> {{ sku.category.name }} </a>
+        <span class="ps-1 pe-1">></span>
+        <a href="{% url 'product:subCategoryList' subCategoryName=sku.subCategory.nameEN page=1 %}" class="link-dark" style="text-decoration: none;"> {{ sku.subCategory.name }} </a>
+        <span class="ps-1 pe-1">></span>
+        <span> 商品详情</span>
+    </div>
+    <div class="container">
+        <div class="row">
+
+            <!-- The left section -->
+            <div class="col-md-5">
+                
+                <!-- The top big image -->
+                <div class="large-image-container d-flex" style="align-items: center; margin-bottom: 20px">
+                    <img src="{{ picture.0.image.url }}" class="d-block w-100" alt="Large Image" id="largeImage">
+                </div>
+
+                <!-- The bottom small image section -->
+                <div class="image-row" style="display: flex; flex-wrap: wrap;">
+                    {% for picture in pictures %}
+                    <div class="image-container" style="opacity: 0.5;">
+                        <img src="{{ picture.image.url }}" class="image-indicator" style="max-width: 80px;" alt="{{ picture.sku }}">
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <!-- The right section -->
+            <div class="col-md-7">
+
+                <!-- Product name -->
+                <div class="container">
+                    <h4>{{ sku.name }}</h3>
+                </div>
+                
+                <!-- Alerting Note -->
+                <div class="container d-flex align-items-center alert alert-primary" role="alert" style="background-color: rgb(31, 33, 109); color: white; padding: 8px">
+                    <h6 style="margin: 8px;">
+                        >> 不足1kg 按1kg计算运费, 超过1kg 按实际重量计算运费，包邮商品除外，新旧包装随机发货。
+                    </h6> 
+                </div>
+                
+                <!-- Other products in the same SPU -->
+                <div class="container" style="margin-bottom: 16px;">
+                    <p style="margin-bottom: 4px; font-weight: bold;">其他款式:</p>
+                    <div class="d-flex flex-wrap">
+                        {% for sku in sameSpuSkus %}
+                        <a class="link-dark rounded border" 
+                           style="font-size: small; text-decoration: none; padding: 4px; margin-right: 8px; margin-bottom: 8px" 
+                           href="{% url 'product:detail' sku.id %}">
+                            {{ sku.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Serivce provided -->
+                <div class="container" style="margin-bottom: 16px;">
+                    <p style="margin-bottom: 4px; font-weight: bold;">贴心服务</p>
+                    <p style="font-size: small; font-style: italic;">巧克力、软糖、胶囊类等易融化的产品，由于运输过程中温度变化导致的变形、粘连等不在理赔范围，所有液体膏体易碎品需加固打包泡泡纸或气柱，物流公司才能理赔。</p>
+                    <div class="d-flex flex-wrap">
+                        {% for addOnService in addOnServices %}
+                        <button 
+                            type="button"
+                            id="{{ addOnService.id }}"
+                            data-bs-toggle="button"
+                            class="btn btn-light border" 
+                            style="padding: 4px; margin-right: 8px; margin-bottom: 8px;"
+                            aria-pressed="true">
+                            {{ addOnService.name }}  ${{ addOnService.price }}/{{ addOnService.unit }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Unit Price -->
+                <div class="container" style="margin-bottom: 16px;">
+                    <p style="margin-bottom: 4px; font-weight: bold;">单价</p>
+                    <span class="show_pirze" style="font-size: 24px;font-weight: bolder;color: red;">¥<em>{{ sku.price }}</em></span>
+				    <span class="show_unit" style="padding-left: 16px;">单位：{{ sku.unit }}</span>
+                </div>
+
+                <!-- Quantity -->
+                <div class="container" style="margin-bottom: 16px;">
+                    <p style="margin-bottom: 4px; font-weight: bold;">数 量：</p>
+                    <div class="num_add">
+                        <a href="javascript:;" class="minus border" style="text-decoration: none; padding: 4px 8px 4px 8px;">-</a>	
+                        <input type="text" class="numShow rounded border" style="text-align: center; width: 40px;" value="1">
+                        <a href="javascript:;" class="add border" style="text-decoration: none; padding: 4px 8px 4px 8px;">+</a>
+                    </div> 
+                </div>
+
+                <!-- Total Price -->
+                <div class="container" style="margin-bottom: 16px;">
+                    <div class="total" style="margin-bottom: 4px; font-weight: bold;">总价：<em style="font-size: 24px;font-weight: bolder;color: red;"></em></div>
+                </div>
+
+                <!-- Action -->
+                <div class="container" style="margin-bottom: 16px;">
+                    <div class="operate_btn">
+                        {% csrf_token %}
+                        <a href="javascript:;" skuId="{{ sku.id }}" class="buyBtn link-dark border rounded" id="buyBtn" style="text-decoration: none; padding: 4px; margin-right: 8px; ">立即购买</a>
+                        <a href="javascript:;" skuId="{{ sku.id }}" class="addCart link-dark border rounded" id="addCart" style="text-decoration: none; padding: 4px;">加入购物车</a>
+                        {{ errmsg }}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="container" style="margin-bottom: 16px;">
+        <p>{{ sku.description }}</p>
+    </div>
+</div>
+{% endblock body %}
+{% block bottom %}
+	<div class="addJump"></div>
+{% endblock bottom %}
+{% block bottomfiles %}
+<script type="text/javascript" src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
+<script type="text/javascript">
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To calculate the total quantity and price of selected products
+    updateProductCount()
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To calculate the product total price, count
+    function updateProductCount() {
+        // Get the product unit price and quantity
+        price = $('.show_pirze').children('em').text()
+        count = $('.numShow').val()
+        // Calculate the total price
+        price = parseFloat(price)
+        count = parseInt(count)
+        amount = price*count
+        // Set the total price
+        $('.total').children('em').text("¥" + amount.toFixed(2))
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To increase product quantity
+    $('.add').click(function () {
+        // To get the product quantity shown (current)
+        count = $('.numShow').val()
+        // +1
+        count = parseInt(count)+1
+        // Reset the product quantity after "+1"
+        $('.numShow').val(count)
+        // Update the product total price
+        updateProductCount()
+    })
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To decrease product quantity
+    $('.minus').click(function () {
+        // To get the product quantity shown (current)
+        count = $('.numShow').val()
+        // -1, if less than 0, reset to 1
+        count = parseInt(count)-1
+        if (count <= 0){
+            count = 1
+        }
+        // Reset the product quantity after "-1"
+        $('.numShow').val(count)
+        // Update the product total price
+        updateProductCount()
+    })
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To manual input product quantity
+    $('.numShow').blur(function () {
+        // To get the product quantity input manually
+        count = $(this).val()
+        // To check if "count" is a legal value, if not, reset to "1"
+        if (isNaN(count) || count.trim().length==0 || parseInt(count) <=0){
+            count = 1
+        }
+        // Reset the product quantity after "manual input"
+        $(this).val(parseInt(count))
+        // Update the product total price
+        updateProductCount()
+    })
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To get "addCart div" element top left corner coordinate
+    var $addX = $('#addCart').offset().top;
+    var $addY = $('#addCart').offset().left;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To get "showCount div" element top left corner coordinate
+    var $toX = $('#showCount').offset().top;
+    var $toY = $('#showCount').offset().left;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To add product into shopping cart
+    $('#addCart').click(function(){
+        // To get product sku id and product quantity
+        skuId = $(this).attr('skuId') // attr prop
+        count = $('.numShow').val()
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+
+        // To construct new skuId with service options, format: skuID_serviceID1_serviceID2_...
+        skuIdandAddOnServiceIds = skuId
+        $(".btn.btn-light.border.active").map(function() {
+            if (this.id) { 
+                skuIdandAddOnServiceIds = skuIdandAddOnServiceIds + "_" + this.id 
+            }
+        });
+        
+        // grouping parameters
+        params = {'skuIdandAddOnServiceIds':skuIdandAddOnServiceIds, 'count':count, 'csrfmiddlewaretoken':csrf}
+
+        // send "ajax post" request，visit "/cart/add", passing parameters: skuIdandAddOnServiceIds (skuId and addOnServiceIds), count
+        $.post('/cart/add', params, function (data) {
+            if (data.res == 5){
+                // adding successfully
+                $(".addJump").css({'left':$addY+80,'top':$addX+10,'display':'block'})
+                $(".addJump").stop().animate({
+                    'left': $toY+7,
+                    'top': $toX+7},
+                    "fast", function() {
+                        $(".addJump").fadeOut('fast',function(){
+                            // reset the production quantity in the shopping cart
+                            $('#showCount').html(data.totalCount);
+                        });
+                });
+            }
+            else{
+                // adding failure
+                alert(data.errmsg)
+            }
+        })
+    })
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To add product into shopping cart and directly navigate to the shopping cart page
+    $('#buyBtn').click(function(){
+        // To get product sku id and product quantity
+        skuId = $(this).attr('skuId') // attr prop
+        count = $('.numShow').val()
+        csrf = $('input[name="csrfmiddlewaretoken"]').val()
+
+        // To construct new skuId with service options, format: skuID_serviceID1_serviceID2_...
+        skuIdandAddOnServiceIds = skuId
+        $(".btn.btn-light.border.active").map(function() {
+            if (this.id) { 
+                skuIdandAddOnServiceIds = skuIdandAddOnServiceIds + "_" + this.id 
+            }
+        });
+        
+        // grouping parameters
+        params = {'skuIdandAddOnServiceIds':skuIdandAddOnServiceIds, 'count':count, 'csrfmiddlewaretoken':csrf}
+
+        // send "ajax post" request，visit "/cart/add", passing parameters: skuIdandAddOnServiceIds (skuId and addOnServiceIds), count
+        $.post('/cart/add', params, function (data) {
+            if (data.res == 5){
+                // adding successfully
+                $(".addJump").css({'left':$addY+80,'top':$addX+10,'display':'block'})
+                $(".addJump").stop().animate({
+                    'left': $toY+7,
+                    'top': $toX+7},
+                    "fast", function() {
+                        $(".addJump").fadeOut('fast',function(){
+                            // reset the production quantity in the shopping cart
+                            $('#showCount').html(data.totalCount);
+
+                            window.location.href = '/cart';
+
+                        });
+                });
+            }
+            else{
+                // adding failure
+                alert(data.errmsg)
+            }
+        })
+
+
+    })
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // To add carousel and correlate with main picture
+    // Initialize the main picture carousel
+    var imageContainers = document.querySelectorAll('.image-container');
+    var largeImageContainer = document.querySelector('.large-image-container');
+    var largeImage = document.getElementById('largeImage');
+
+    // Initialize the large image with the first image
+    largeImage.src = imageContainers[0].querySelector('img').src;
+    imageContainers[0].style.opacity = 1;
+
+    // Loop through each image container and add a click event listener
+    imageContainers.forEach(function(container) {
+
+        container.addEventListener('click', function() {
+        
+            // Set the source of the large image to the clicked image
+            largeImage.src = container.querySelector('img').src;
+        
+            // Show the large image container
+            largeImageContainer.style.display = 'block';
+            
+            // Make the clicked image fully opaque
+            container.style.opacity = 1;
+            
+            // Make other image containers opaque
+            imageContainers.forEach(function(otherContainer) {
+                if (otherContainer !== container) {
+                    otherContainer.style.opacity = 0.7;
+                }
+            });
+        });
+    
+    });
+
+    // Close the large image container when clicking outside of it
+    largeImageContainer.addEventListener('click', function(event) {
+        if (event.target === largeImageContainer) {
+            largeImageContainer.style.display = 'none';
+        }
+    });
+
+
+</script>
+{% endblock bottomfiles %}

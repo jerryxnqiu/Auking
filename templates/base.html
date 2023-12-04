@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>{% block title %}{% endblock title %}</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+	<script src="https://kit.fontawesome.com/def8487c66.js" crossorigin="anonymous"></script>
+	<script src="https://js.stripe.com/v3/"></script>
+
+	<link rel="stylesheet" type="text/css" href="{% static 'css/auking.css' %}">
+	<!--  -->
+	{% block topfiles %}{% endblock topfiles %}
+
+</head>
+<body>
+
+<!-- Top header nav bar -->
+{% block headerCon %}
+<nav class="navbar navbar-expand-lg border align-items-center p-1">
+	<div class="container d-flex justify-content-center">
+		<div class="row align-items-center" style="width: 100%;">
+			<div class="col-lg-8 col-md-9">
+				<div class="row align-items-center">
+					<div class="col">
+						<a class="navbar-brand" style="font-size: larger; font-weight: bolder;" href="{% url 'product:index' %}">欢迎来到爱优品礼品店</a>
+					</div>
+					<div class="col" style="text-align: right;">
+						<a class="nav-link">欢迎您：<em style="font-weight: bold;">{{ user.username }}</em></a>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4 col-md-3">
+				<button 
+					class="navbar-toggler" 
+					type="button"
+					data-bs-toggle="collapse" 
+					data-bs-target="#navmenu"
+					aria-controls="navmenu" 
+					aria-expanded="false" 
+					aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+
+				<div class="collapse navbar-collapse justify-content-center" id="navmenu" style="font-size: medium;">
+					<ul class="navbar-nav">
+						<li class="nav-item navHeader">
+							<a class="nav-link" href="{% url 'user:logout' %}">退出</a>
+						</li>
+						<li class="nav-item navHeader">
+							<a class="nav-link" href="{% url 'user:login' %}">登录</a>
+						</li>
+						<li class="nav-item navHeader">
+							<a class="nav-link" href="{% url 'user:register' %}">注册</a>
+						</li>
+						<li class="nav-item navHeader">
+							<a class="nav-link" href="{% url 'user:user' %}">会员中心</a>
+						</li>
+						<li class="nav-item navHeader">
+							<a class="nav-link" href="{% url 'cart:show' %}">我的购物车</a>
+						</li>
+						<li class="nav-item navHeader">
+							<a class="nav-link" href="{% url 'user:order' 1 %}">我的订单</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</nav>
+{% endblock headerCon %}
+
+
+<!-- Logo + search bar + shopping cart -->
+{% block searchBar %}
+<section class="mt-2">
+	<div class="container">
+		<div class="row justify-content-center align-items-center">
+			<div class="col-lg-3 col-md-3 col-sm-3">
+				<a href="index.html">
+					<img class="img-fluid" alt="aukingLogo" src="{% static 'images/aukingLogo.png' %}">
+				</a>
+			</div>
+			<div class="col-lg-7 col-md-6 col-sm-5">
+				<form class="d-flex" action="/search" method="get" >
+					<input type="text" class="form-control" name="searchQuery" type="search" placeholder="搜索商品">
+					<input class="btn btn-outline-secondary" style="color: black; border-style: solid; border-color: lightgrey;" type="submit" value="搜索">
+				</form>
+			</div>
+			<div class="col-lg-2 col-md-3 col-sm-4">
+				<div class="row">
+					<div class="col-sm-9 border" style="padding: 0px;">
+						<a class="nav-link text-center d-flex justify-content-center align-items-center" href="{% url 'cart:show' %}">
+							<img alt="" src="{% static 'images/shoppingCart.png' %}" style="padding-right: 5px; height: 20px;">
+							我的购物车
+						</a>
+					</div>
+					<div class="col-sm-3" style="padding: 0px; background-color:#2A7DD1; color: white;">
+						<div class="text-center" id="showCount">{{ cartCount|default:"0" }}</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+{% endblock searchBar %}
+
+
+<!-- Main navigation bar -->
+{% block navigationBar %}
+<section class="container text-center">
+	<div class="row justify-content-center align-items-center" style="padding: 0px 30px;">
+		<div class="col-lg-2 col-md-3 col-sm-4">
+			<div class="container">
+				<div class="row justify-content-center align-items-center">
+					<div class="dropdown navMain">
+						<button 
+							class="btn dropdown-toggle hidden-arrow" 
+							type="button" 
+							id="dropdownMenuButton"
+							data-bs-toggle="dropdown" 
+							aria-expanded="false">全部商品分类
+						</button>
+						<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+							{% for category in categories %}
+							<li>
+								{% with categoryNameVar=category.nameEN %}
+									<a class="dropdown-item justify-content-center" href="{% url 'product:categoryList' categoryName=categoryNameVar page=1 %}">
+										<img alt="" src="{{ category.logo.url }}" style="padding-right: 5px; height: 20px;">
+										{{ category.name }}
+									</a>
+								{% endwith %}
+							</li>
+							{% endfor %}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-10 col-md-9 col-sm-8">
+			<div class="container">
+				<div class="row">
+					<div class="col navMain">
+						<a href="{% url 'product:index' %}" class="d-flex justify-content-center">首页</a>
+					</div>
+					<div class="col navMain">
+						<a href="#" class="d-flex justify-content-center">海外直邮</a>
+					</div>
+					<div class="col navMain">
+						<a href="#" class="d-flex justify-content-center">一般贸易</a>
+					</div>
+					<div class="col navMain">
+						<a href="#" class="d-flex justify-content-center">保税直发</a>
+					</div>
+					<div class="col navMain">
+						<a href="#" class="d-flex justify-content-center">每日特惠</a>
+					</div>
+					<div class="col navMain">
+						<a href="#" class="d-flex justify-content-center">新品推荐</a>
+					</div>
+					<div class="col navMain">
+						<a href="#" class="d-flex justify-content-center">活动专区</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<hr class="mt-0">
+{% endblock navigationBar %}
+
+<!-- The floating component -->
+{% block floatingChatBox %}
+
+<div class="floatingButton" id="draggingFloatingButton">
+	<a class="openBtn">
+		<img alt="" src="{% static 'images/qRCodeIcon.jpg' %}" style="width: 50px; height: 50px; border-radius: 50%;">
+	</a>
+</div>
+
+<div class="floatingContent" id="draggingFloatingContent">
+	<a class="closeBtn">
+		<img alt="" src="{% static 'images/weChatQRCode.jpg' %}" style="width: 200px;">
+	</a>
+</div>
+
+{% endblock floatingChatBox %}
+
+
+<!-- Main body section -->
+{% block body %}{% endblock body %}
+
+
+<!-- Footer information section -->
+{% block bottom %}
+<footer class="text-dark text-center" style="background-color: rgb(238, 238, 238);">
+	<!--Top section-->
+	<section class="container">
+		<div class="row justify-content-center mt-2 mb-2">
+		<!--Grid column-->
+			<div class="col-md-3 col-sm-6 mt-2">
+				<h5 class="" style="font-size: medium;">新手指南</h5>
+				<ul class="list-unstyled mb-0">
+					<li class="navFooter">
+						<a href="#!">注册和登录</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">操作说明</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">商品税率表</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">正品保障</a>
+					</li>
+				</ul>
+			</div>
+			<div class="col-md-3 col-sm-6 mt-2">
+				<h5 class="" style="font-size: medium;">支付配送</h5>
+				<ul class="list-unstyled mb-0">
+					<li class="navFooter">
+						<a href="#!">支付相关</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">物流配送</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">验货签收</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">一件代发</a>
+					</li>
+				</ul>
+			</div>
+			<div class="col-md-3 col-sm-6 mt-2">
+				<h5 class="" style="font-size: medium;">售后服务</h5>
+				<ul class="list-unstyled mb-0">
+					<li class="navFooter">
+						<a href="#!">购买须知</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">服务协议</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">关税法规</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">退货政策</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">身份证报关</a>
+					</li>
+				</ul>
+			</div>
+			<div class="col-md-3 col-sm-6 mt-2">
+				<h5 class="" style="font-size: medium;">销售合作</h5>
+				<ul class="list-unstyled mb-0">
+					<li class="navFooter">
+						<a href="#!">商务合作</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">经营者信息</a>
+					</li>
+					<li class="navFooter">
+						<a href="#!">联系我们</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</section>
+	<!--Bottom section-->
+	<section class="text-center pt-1 pb-1" style="font-size: small;" >
+		CopyRight © 2023
+	  	<a class="nav-link" href="index.html">爱优品礼品店</a>
+	  	<a>All Rights Reserved</a>
+	  	<p><span>电话: 0452 188 963</span><span> | </span><span>ABN: 87602527177</span></p>
+	</section>
+</footer>
+{% endblock bottom %}
+
+
+<!-- Jquery scripts or other scripts -->
+{% block baseBottomfiles %}
+<script type="text/javascript" src="{% static 'js/jquery-3.6.3.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script>
+	$(document).ready(function() {
+
+		///////////////////////////////////////////////////////////////////////////////////////////////
+		// Function to toggle the visibility of the floating component
+		$('.floatingButton, .floatingContent').click(function() {
+			$('.closeBtn, .openBtn').toggleClass('active');
+		});
+
+		var $draggingFloatingButton = $("#draggingFloatingButton");
+		var $draggingFloatingContent = $("#draggingFloatingContent");
+		var containerWidth = $(window).width();
+		var containerHeight = $(window).height();
+
+
+		$("#draggingFloatingButton").draggable({
+
+			axis: "y",
+			
+			stop: function(event, ui) {
+
+				var positionButton = $draggingFloatingButton.position();
+
+				var right = containerWidth - (positionButton.left + $draggingFloatingButton.width());
+    			var bottomButton = $draggingFloatingButton.height();
+
+				$("#draggingFloatingContent").css({
+					// inset: positionButton.top + "px 20px " + bottomButton + "px " + positionButton.left + "px"
+					right: right + "px",
+   					bottom: bottomButton + "px"
+				})
+				
+			}
+   		});
+
+	})
+
+
+
+</script>
+{% endblock baseBottomfiles %}
+
+{% block bottomfiles %}
+{% endblock bottomfiles %}
+</body>
+</html>
