@@ -12,10 +12,13 @@
     1.5 python manage.py runserver
 
 ### 2. MySQL
-    2.1 Installation - brew install mysql
-    2.2 To start the service - mysql.server start
-    2.3 To stop service - brew services stop mysql/mysql.server stop
-    2.4 Password in setting file
+#### 2.1 Install on MacOS
+    2.1.1 Installation - brew install mysql
+    2.1.2 To start the service - mysql.server start
+    2.1.3 To stop service - brew services stop mysql/mysql.server stop
+    2.1.4 Password in setting file
+
+#### 2.2 Install on Ubuntu
 
 ### 3. Redis, as the middle layer Database
     3.1 Installation - brew install redis
@@ -41,6 +44,17 @@
     6.3 To see the running message - curl HTTP://localhost:8080
     6.4 To find out the configuration file path - nginx -t
     6.5 To stop the service - nginx -s stop
+
+
+### 7. Linux Ubuntu environment setup
+    7.1 sudo apt-get update
+    7.2 sudo apt-get upgrade
+    7.3 python3 --version
+    7.4 sudo apt-get install -y python3-venv
+
+    7.5 python3 -m venv .venv
+
+
 
 
 https://thenounproject.com/search/icons/?iconspage=1&q=baby%20care
