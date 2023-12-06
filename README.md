@@ -54,13 +54,14 @@ https://medium.com/@aadarshachapagain/setting-up-django-with-mysql-nginx-and-gun
 
 #### 1.4 To install and activate virtual environment
     sudo apt-get install -y python3-venv
+    cd Auking
     python3 -m venv .venv
     source .venv/bin/activate
 ___
 
 ### 2. MySQL Server
 #### 2.1 To install the mysql-server 
-    sudo apt-get install mysql-server
+    sudo apt-get install -y mysql-server
 
 #### 2.2 To login to MySQL as a root
     sudo mysql
@@ -71,39 +72,59 @@ ___
 #### 2.4 To update the user privileges
     FLUSH PRIVILEGES;
 
-#### 2.5 To check if MySQL is still running
+#### 2.5 To create the database
+    create database auking;
+
+#### 2.6 To check if MySQL is still running
     sudo systemctl status mysql
     ps aux | grep mysql
 
-#### 2.6 To setup enviornment for mysqlclient package install
+#### 2.7 To setup enviornment for mysqlclient package install
     sudo apt-get install -y python3-dev default-libmysqlclient-dev build-essential
 ___
+### 3. Redis
+#### 3.1 To install Redis
+    sudo apt install lsb-release curl gpg
+    
+    curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
 
-### 3. Nginx
-#### 3.1 To install Nginx
+    echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+
+    sudo apt-get update
+    sudo apt-get install redis
+
+#### 3.2 To check the service of Redis
+    sudo systemctl status redis-server
+
+#### 3.3 To enable the Redis if not in service
+    sudo systemctl enable redis-server
+    sudo systemctl start redis-server
+
+### 4. Nginx
+#### 4.1 To install Nginx
     sudo apt-get install -y nginx
 ___
 
-### 4. To install the related Python packages
+### 5. To install the related Python packages
     pip install -r requirements.txt
 
-### 4. gunicorn
-#### 4.1 To install gunicorn
+### 6. gunicorn
+#### 6.1 To install gunicorn
     pip install gunicorn
 ___
 
-### 5. supervisor
-#### 5.1 Objective
-    Supervisor is a process control system that enables users to monitor and control UNIX-like operating system processes. It assists in managing processes that should be kept running continuously in a system by providing mechanisms to start, stop, and restart processes based on configurations or events.
-#### 5.2 To install supervisor
+### 7. supervisor
+#### 7.1 Objective
+Supervisor is a process control system that enables users to monitor and control UNIX-like operating system processes. It assists in managing processes that should be kept running continuously in a system by providing mechanisms to start, stop, and restart processes based on configurations or events.
+#### 7.2 To install supervisor
     sudo apt-get install supervisor
-#### 5.3 Sample "gunicorn.conf" configuraiton
-##### 5.3.1 Location: 
+#### 7.3 Sample "gunicorn.conf" configuraiton
+##### 7.3.1 Location: 
     cd /etc/supervisor/conf.d/
-##### 5.3.2 To configure the "gunicorn.conf" file
+##### 7.3.2 To configure the "gunicorn.conf" file
     sudo touch gunicorn.conf
     sudo nano gunicorn.conf
-##### 5.3.3 Sample code for "gunicorn.conf"
+##### 7.3.3 Sample code for "gunicorn.conf"
     [program:Auking]
     directory=/home/ubuntu/Auking
     command=/home/ubuntu/Auking/.venv/bin/gunicorn --workers 3 --bind unix:/home/ubuntu/Auking/app.sock auking.wsgi.application
@@ -115,15 +136,15 @@ ___
     [group:Auking]
     programs:Auking
 
-#### 5.4 To create folder for the error logs
+#### 7.4 To create folder for the error logs
     sudo mkdir /var/log/Auking
 
-#### 5.5 To tell "Supervisor" to read from the configuration file
+#### 7.5 To tell "Supervisor" to read from the configuration file
     sudo supervisorctl reread
     sudo supervisorctl update
     sudo supervisorctl status
 ___
 
-### 6. Useful links
+### 8. Useful links
     https://thenounproject.com/search/icons/?iconspage=1&q=baby%20care
     https://fontawesome.com/search
