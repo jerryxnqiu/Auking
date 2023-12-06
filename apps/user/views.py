@@ -21,8 +21,6 @@ from product.models import ProductCategory, ProductSKU
 from order.models import OrderInfo, OrderProduct
 from utils.mixin import LoginRequiredMixin
 from celery_tasks.tasks import sendRegisterActivateEmail, sendReactivateEmail
-from captcha.fields import ReCaptchaField
-from captcha.widgets import ReCaptchaV2Checkbox
 
 
 # Create your views here.
