@@ -91,7 +91,7 @@ ___
     echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
 
     sudo apt-get update
-    sudo apt-get install redis
+    sudo apt-get install -y redis
 
 #### 3.2 To check the service of Redis
     sudo systemctl status redis-server
@@ -99,35 +99,31 @@ ___
 #### 3.3 To enable the Redis if not in service
     sudo systemctl enable redis-server
     sudo systemctl start redis-server
-
-### 4. Nginx
-#### 4.1 To install Nginx
-    sudo apt-get install -y nginx
 ___
-
-### 5. To install the related Python packages
+### 4. To install the related Python packages
     pip install -r requirements.txt
 
-### 6. gunicorn
-#### 6.1 To install gunicorn
+### 5. gunicorn
+#### 5.1 To install gunicorn
     pip install gunicorn
 ___
 
-### 7. supervisor
-#### 7.1 Objective
+### 6. supervisor
+#### 6.1 Objective
 Supervisor is a process control system that enables users to monitor and control UNIX-like operating system processes. It assists in managing processes that should be kept running continuously in a system by providing mechanisms to start, stop, and restart processes based on configurations or events.
-#### 7.2 To install supervisor
-    sudo apt-get install supervisor
-#### 7.3 Sample "gunicorn.conf" configuraiton
-##### 7.3.1 Location: 
+#### 6.2 To install supervisor
+    sudo apt-get install -y supervisor
+#### 6.3 Sample "gunicorn.conf" configuraiton
+##### 6.3.1 Location: 
     cd /etc/supervisor/conf.d/
-##### 7.3.2 To configure the "gunicorn.conf" file
+##### 6.3.2 To configure the "gunicorn.conf" file
     sudo touch gunicorn.conf
     sudo nano gunicorn.conf
-##### 7.3.3 Sample code for "gunicorn.conf"
+    sudo nano /etc/supervisor/conf.d/gunicorn.conf
+##### 6.3.3 Sample code for "gunicorn.conf"
     [program:Auking]
     directory=/home/ubuntu/Auking
-    command=/home/ubuntu/Auking/.venv/bin/gunicorn --workers 3 --bind unix:/home/ubuntu/Auking/app.sock auking.wsgi.application
+    command=/home/ubuntu/Auking/.venv/bin/gunicorn --workers 3 --bind unix:/home/ubuntu/Auking/app.sock auking.wsgi:application
     autostart=true
     autorestart=true
     stderr_logfile=/var/log/Auking/Auking.err.log
@@ -136,15 +132,47 @@ Supervisor is a process control system that enables users to monitor and control
     [group:Auking]
     programs:Auking
 
-#### 7.4 To create folder for the error logs
+#### 6.4 To create folder for the error logs
     sudo mkdir /var/log/Auking
 
-#### 7.5 To tell "Supervisor" to read from the configuration file
+#### 6.5 To tell "Supervisor" to read from the configuration file
     sudo supervisorctl reread
     sudo supervisorctl update
     sudo supervisorctl status
-___
+    sudo service supervisor restart
 
+#### 6.6 To check error logs or modify the gunicorn.conf
+    less /var/log/Auking/Auking.err.log
+    sudo nano /etc/supervisor/conf.d/gunicorn.conf
+___
+### 7. Nginx
+#### 7.1 To install Nginx
+    sudo apt-get install -y nginx
+#### 7.2 To configure Nginx
+    sudo nano /etc/nginx/nginx.conf
+#### 7.3 To configure the "django.conf"
+    cd /etc/nginx/sites-available
+    sudo touch django.conf
+    sudo nano django.conf
+    sudo nano /etc/nginx/sites-available/django.conf
+
+    server {
+        listen 80;
+        server_name 54.221.105.98;
+
+        location / {
+            include proxy_params;
+            proxy_pass http://unix:/home/ubuntu/Auking/app.sock;
+        }
+    }
+
+#### 7.4 To check if syntax is correct and put site online
+    sudo ln django.conf /etc/nginx/sites-enabled
+    sudo service nginx restart
+
+
+___
 ### 8. Useful links
     https://thenounproject.com/search/icons/?iconspage=1&q=baby%20care
     https://fontawesome.com/search
+
