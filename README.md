@@ -1,31 +1,75 @@
 # First Website Project
 
 ## Technologies used and Development Environment Setup (MacOS):
+
 ### 1. Django
-    1.1 python manage.py makemigrations
-    1.2 python manage.py migrate
-    1.3 python manage.py createsuperuser
-        Username: admin
-        Password: admin
-        Email address: admin@auking.com.au
-    1.4 python manage.py collectstatic
-    1.5 python manage.py runserver
+#### 1.1 To create new migrations based on the changes you have made to your models
+    python manage.py makemigrations
+
+#### 1.2 To apply and unapply migrations 
+    python manage.py migrate
+
+#### 1.3 To create super user 
+    python manage.py createsuperuser
+    Username: admin
+    Password: admin
+    Email address: admin@auking.com.au
+
+#### 1.4 To collect all static files into a folder specified in settings.py - STATIC_ROOT 
+    python manage.py collectstatic
+
+#### 1.5 To run development mode server 
+    python manage.py runserver
+___
 
 ### 2. MySQL
-    2.1 Installation - brew install mysql
-    2.2 To start the service - mysql.server start
-    2.3 To stop service - brew services stop mysql/mysql.server stop
-    2.4 Password in setting file
+#### 2.1 To install Mysql 
+    brew install mysql
+
+#### 2.2 To start the service
+brew services (services in general) will restart automatically after rebooting; the other (mysql.server start) will not.
+    brew services start mysql
+    mysql.server start
+    
+#### 2.3 To stop service
+    brew services stop mysql
+    mysql.server stop
+
+#### 2.4 To login mysql command line mode
+    mysql -u root -p
+    Password in setting file
+
+#### 2.5 To display database
+    show databases;
+    show tables;
+    use <database name>;
+
+#### 2.6 (optional) To check the host of user=root, if "%", can be connected outside docker, if "localhost", can only be connected within docker
+    select user, host from mysql.user;
+    update mysql.user set host='%' where user='root'
+___
 
 ### 3. Redis, as the middle layer Database
-    3.1 Installation - brew install redis
-    3.2 To start the service - redis-server
-    3.3 To stop the service - Ctrl-C
-    3.4 To retart the redis - brew services restart redis
+#### 3.1 Installation
+    brew install redis
+
+#### 3.2 To start the service
+    redis-server
+
+#### 3.3 To stop the service
+    Ctrl-C
+
+#### 3.4 To retart the redis
+    brew services restart redis
+___
 
 ### 4. Celery, as the delay queue for tasks
-    4.1 pip install celery
-    4.2 celery -A celery_tasks.tasks worker -l info
+#### 4.1 To install the celery
+    pip install celery
+     
+#### 4.2 To start the celery service 
+    celery -A celery_tasks.tasks worker -l info
+___
 
 ### 5. Use activation email to close the registration loop (https://www.youtube.com/watch?v=iGPPhzhXBFg)
     EMAIL_HOST = 'smtp.gmail.com'
@@ -34,6 +78,8 @@
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+___
+___
 
 ## Production Environment Setup
 ![Architecture](static/images/image.png)
@@ -75,7 +121,7 @@ ___
 #### 2.5 To create the database
     create database auking;
 
-#### 2.6 To check if MySQL is still running
+#### 2.6 To check if MySQL is running
     sudo systemctl status mysql
     ps aux | grep mysql
 
@@ -96,9 +142,14 @@ ___
 #### 3.2 To check the service of Redis
     sudo systemctl status redis-server
 
-#### 3.3 To enable the Redis if not in service
+#### 3.3 To enable the Redis service to start automatically at system boot on systems that use systemd for service management
     sudo systemctl enable redis-server
+    
+#### 3.4 To run Redis at the background
     sudo systemctl start redis-server
+    redis-server --daemonize yes
+
+    redis-server
 ___
 ### 4. To install the related Python packages
     pip install -r requirements.txt
@@ -155,7 +206,7 @@ ___
     sudo touch django.conf
     sudo nano django.conf
     sudo nano /etc/nginx/sites-available/django.conf
-
+#### 7.4 Sample code for "django.conf"
     server {
         listen 80;
         server_name 54.221.105.98;
@@ -163,6 +214,10 @@ ___
         location / {
             include proxy_params;
             proxy_pass http://unix:/home/ubuntu/Auking/app.sock;
+        }
+
+        location /static {
+            alias /home/ubuntu/Auking/collectstatic/;
         }
     }
 
