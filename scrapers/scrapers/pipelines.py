@@ -37,4 +37,4 @@ class CustomImageTGPipeline(ImagesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
         imageName = request.url.split("?")[0].split("/")[-1] + ".webp"
         productId = item.get('metaValue', 'NoIdFolder')
-        return f"{productId}/{imageName}.jpg"
+        return f"{productId}/{imageName}"

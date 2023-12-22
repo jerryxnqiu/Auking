@@ -38,7 +38,8 @@
 #### 5. To install python libraries
     pip install django-storages
     pip install boto3
-
+___
+___
 ### Technologies used and Development Environment Setup (MacOS):
 
 ### 1. Django
@@ -119,7 +120,7 @@ ___
     EMAIL_USE_TLS = True
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 ___
-
+___
 ## Production Environment Setup
 ![productionArchitecture](static/images/productionArchitecture.png)
 
