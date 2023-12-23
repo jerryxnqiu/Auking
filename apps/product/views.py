@@ -320,3 +320,91 @@ class ProductSubCategoryListView(View):
         return render(request, 'listSubCategory.html', context)
 
     pass
+
+
+### Grid view of products of a spu
+class ProductSPUListView(View):
+    """SPU List Page"""
+
+    def get(self, request, spuName, page):
+        
+        # To get the product spu
+        spus = ProductSPU.objects.all()
+
+        try:
+            spu = ProductSPU.objects.get(nameEN=spuName)
+        except ProductSPU.DoesNotExist as e:
+            return redirect(reverse('product:index'))
+
+        # To get the sorting method
+        sort = request.GET.get('sort')
+        if sort == 'price':
+            skus = ProductSKU.objects.filter(spu=spu).order_by('price')
+        elif sort == 'hot':
+            skus = ProductSKU.objects.filter(spu=spu).order_by('-sales')
+        else:
+            sort = 'default'
+            skus = ProductSKU.objects.filter(spu=spu).order_by('-id')
+
+        category = skus[0].category
+
+        # To separate skus into pages, "x" order per page
+        orderPerPage = 30
+        paginator = Paginator(skus, orderPerPage)
+        
+        # To get the content of page "x"
+        try:
+            page = int(page)
+        except Exception as e:
+            page = 1
+
+        if page > paginator.num_pages:
+            page = 1
+
+        # To get the contents on page "page"
+        skusPage = paginator.page(page)
+
+        # To limit the display of page number to "5"
+        # 1. If total less than 5, then just display [1 - page number]
+        # 2. If current is on page 3，then display [1,2,3,4,5]
+        # If current is on last 3 pages, then display [4,5,6,7,8] num_pages-4 to num_oages+1
+        numPages = paginator.num_pages
+        
+        # 1
+        if numPages < 5:
+            pages = range(1, numPages + 1)
+        
+        # 2
+        elif page <= 3:
+            pages = range(1, 6)
+        elif numPages - page <= 2:
+            pages = range(numPages-4, numPages+1)
+        else:
+            pages = range(page - 2, page + 3)
+            
+
+        # To get the content through the page object
+        # To get the new products
+        newSkus = ProductSKU.objects.filter(spu=spu).order_by('-create_time')[:2]
+
+        # 获取首页购物车的数目
+        cartCount = 0
+        if request.user.is_authenticated:
+            conn = get_redis_connection('default')
+            cartKey = 'cart_%s' % request.user.id
+            cartCount = conn.hlen(cartKey)
+
+        context = {
+            "sort": sort,
+            'category': category,
+            'spu': spu,
+            'spus': spus,
+            "skusPage": skusPage,
+            'newSkus': newSkus,
+            "cartCount": cartCount,
+            "pages": pages,
+        }
+
+        return render(request, 'listSPU.html', context)
+
+    pass

@@ -65,6 +65,7 @@ db.sqlite3-journal
 *_initial.py
 *.DS_Store*
 scrapyDownloadImages/
+productSKU/
 scrapylog.txt
 
 # Flask stuff:

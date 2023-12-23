@@ -296,7 +296,7 @@ class TargetLegoSpider(scrapy.Spider):
 
         #####################################################################################################
         # To calculate the price, profit and exchange rate
-        price = productPrice * 1.1 * 4.8
+        price = math.ceil(productPrice * 1.1 * 4.8)
         item["price"] = price
 
         # To calculate the GST

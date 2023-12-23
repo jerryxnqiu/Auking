@@ -475,7 +475,7 @@ class ChemistwarehouseProductsSpider(scrapy.Spider):
 
         #####################################################################################################
         # To calculate the price, profit and exchange rate
-        price = float(productPrice) * 1.1 * 4.8
+        price = math.ceil(float(productPrice) * 1.1 * 4.8)
         item["price"] = price
 
         # To calculate the GST

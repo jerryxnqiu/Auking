@@ -38,6 +38,10 @@
 #### 5. To install python libraries
     pip install django-storages
     pip install boto3
+
+#### 6. To run the "python manage.py collectstatic"
+    Only static files will be collected and upload to "https://auking.s3.ap-southeast-2.amazonaws.com/static/"
+    "media/" folder need manual uploading
 ___
 ___
 ### Technologies used and Development Environment Setup (MacOS):

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 爱优品礼品店-商品列表 {% endblock title %}
+
+{% block topfiles %}
+{% endblock topfiles %}
+
+{% block body %}
+<div class="container">
+	<div class="container">
+		<div class="breadcrumb">
+			<a href="{% url 'product:index' %}" class="link-dark" style="text-decoration: none;">全部分类</a>
+			<span class="ps-1 pe-1">></span>
+			<a href="{% url 'product:categoryList' categoryName=category.nameEN page=1 %}" class="link-dark" style="text-decoration: none;"> {{ category.name }} </a>
+			<span class="ps-1 pe-1">></span>
+			<span> {{ subCategory.name }} </span>
+			<span class="ps-1 pe-1">></span>
+			<span> 商品列表</span>
+		</div>
+	</div>
+	<div class="container">
+		{% with spuNameVar=spu.nameEN %}
+		<div class="row">
+			<div class="col-lg-3 col-md-4">
+				<div class="container">
+					<div class="d-flex border justify-content-center">
+						<span>新品推荐</span>
+					</div>
+				</div>
+				<div class="container">
+					{% for sku in newSkus %}
+					<div class="container border" style="margin: 0px; padding: 0px;">
+						<a href="{% url 'product:detail' sku.id %}">
+							<img src="{{ sku.image.url }}" class="d-flex justify-content-center" style="width: 100%;">
+						</a>
+						<a href="{% url 'product:detail' sku.id %}" class="link-dark" style="text-decoration: none;">
+							<span class="d-flex justify-content-center" style="margin: 0px 10px;">{{ sku.name }}</span>
+						</a>
+						<div class="prize" style="margin: 0px 10px;">￥{{ sku.price }}</div>
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+			<div class="col-lg-9 col-md-8">
+				<div class="container nav nav-pills" style="padding-bottom: 30px;">		
+					<a href="{% url 'product:spuList' spuName=spuNameVar page=1 %}" {% if sort == 'default' %}class="link-dark d-flex justify-content-center active" style="color: white; background-color: #1f216d; width: 60px;" {% endif %} class="link-dark d-flex justify-content-center" style="text-decoration: none; width: 60px;">默认</a>
+					<a href="{% url 'product:spuList' spuName=spuNameVar page=1 %}?sort=price" {% if sort == 'price' %}class="link-dark d-flex justify-content-center active" style="color: white; background-color: #1f216d; width: 60px;" {% endif %} class="link-dark d-flex justify-content-center" style="text-decoration: none; width: 60px;">价格</a>
+					<a href="{% url 'product:spuList' spuName=spuNameVar page=1 %}?sort=hot" {% if sort == 'hot' %}class="link-dark d-flex justify-content-center active" style="color: white; background-color: #1f216d; width: 60px;" {% endif %} class="link-dark d-flex justify-content-center" style="text-decoration: none; width: 60px;">人气</a>
+				</div>
+				<div class="container text-center" style="padding-bottom: 30px;">
+					<div class="row row-cols-xl-5 row-cols-lg-3 row-cols-sm-2 justify-content-center align-items-center">
+						{% for sku in skusPage %}
+						<div class="col border d-flex justify-content-center align-items-center" style="height: 160px;">
+							<a href="{% url 'product:detail' sku.id  %}" style="text-decoration:none;">
+								<div class="container d-flex justify-content-center align-items-center" style="height: 100px; width: 150px; padding-top: 5px;">
+									<img src="{{ sku.image.url }}" alt width="100px">
+								</div>
+								<div class="container d-flex justify-content-center align-items-center" style="height: 15px; width: 150px; padding-top: 5px;">
+									<div class="link-dark lh-1" style="font-size: small; font-weight: bold;">¥ {{ sku.price }}</div>
+									<img src="{% static 'images/shoppingCart.png' %}" style="padding-left: 3px; height: 15px;">
+								</div>
+								<div class="container d-flex justify-content-center align-items-center" style="height: 35px; width: 150px; padding: 5px 0px;">
+									<div class="link-dark lh-1" style="font-size: 11px;">{{ sku.name }}</div>
+								</div>
+							</a>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+				<div class="container text-center">
+					{% if skusPage.has_previous %}
+					<a class="link-dark" style="text-decoration:none;" href="{% url 'product:spuList' spuName=spuNameVar page=skusPage.previous_page_number %}?sort={{ sort }}"><上一页</a>
+					{% endif %}
+
+					{% for pindex in pages %}
+						{% if pindex == skusPage.number %}
+							<a class="link-dark" style="font-weight: bolder;" href="{% url 'product:spuList' spuName=spuNameVar page=pindex %}?sort={{ sort }}" class="active">{{ pindex }}</a>
+						{% else %}
+							<a class="link-dark" style="text-decoration:none;" href="{% url 'product:spuList' spuName=spuNameVar page=pindex %}?sort={{ sort }}">{{ pindex }}</a>
+						{% endif %}
+					{% endfor %}
+					
+					{% if skusPage.has_next %}
+					<a class="link-dark" style="text-decoration:none;" href="{% url 'product:spuList' spuName=spuNameVar page=skusPage.next_page_number %}?sort={{ sort }}">下一页></a>
+					{% endif %}
+
+				</div>
+			</div>
+		</div>
+		{% endwith %}
+	</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+{% endblock body %}

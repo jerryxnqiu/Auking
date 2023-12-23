@@ -70,7 +70,11 @@
 						{% for productBanner in category.titleBanners %}
 						<li class="nav-item">
 							<span>|</span>
-							<a href="{% url 'product:subCategoryList' subCategoryName=productBanner.subCategory.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.subCategory.name }}</a>
+								{% if productBanner.subCategory.nameEN == "Lego" %}
+								<a href="{% url 'product:spuList' spuName=productBanner.spu.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.spu.name }}</a>
+								{% else %}
+								<a href="{% url 'product:subCategoryList' subCategoryName=productBanner.subCategory.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.subCategory.name }}</a>
+								{% endif %}
 						</li>
 						{% endfor %}
 

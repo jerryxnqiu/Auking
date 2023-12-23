@@ -542,27 +542,30 @@ def updateIndexCategoryProductBanner():
             # 2. 11 - 14, set to "title"
             
             itemIndex = 0
+            imageOrTitle = "image"
             itemList = sorted(itemList, key=lambda x: x.sales, reverse=True)
             for item in itemList:
                 
-                if itemIndex < 10:
+                if imageOrTitle == "image":
                     displayCategory = 1
                 else:
                     displayCategory = 0
 
                 if itemIndex == 10:
                     itemIndex = 0
+                    imageOrTitle = "title"
+                    displayCategory = 0
 
                 indexCategoryProductBannerinstance, _ = IndexCategoryProductBanner.objects.get_or_create(
                     category=ProductCategory.objects.get(name=ProductSKU.objects.get(name=item).category),
                     subCategory=ProductSubCategory.objects.get(name=ProductSKU.objects.get(name=item).subCategory),
                     spu=ProductSPU.objects.get(name=ProductSKU.objects.get(name=item).spu),
                     sku=ProductSKU.objects.get(name=item),
-                    displayCategory=1,
+                    displayCategory=displayCategory,
                     index=itemIndex,
                 )
                 indexCategoryProductBannerinstance.save()
-                
+                print(displayCategory)
                 itemIndex += 1
 
         else:
