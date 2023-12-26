@@ -126,6 +126,7 @@ ___
 ___
 
 ### 6. To use "elasticsearch" as the search engine for the item searching
+To work with Haystack, elasticsearch >= 7, < 8 is used
 #### 6.1 To install JDK
     brew install openjdk
 
@@ -140,29 +141,23 @@ ___
     % export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
 
 #### 6.3 To install elasticsearch from archive
-    curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.11.3-darwin-x86_64.tar.gz
-    curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.11.3-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
-    tar -xzf elasticsearch-8.11.3-darwin-x86_64.tar.gz
-    cd elasticsearch-8.11.3/ 
+    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.16-darwin-x86_64.tar.gz
+    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.16-darwin-x86_64.tar.gz.sha512
+    shasum -a 512 -c elasticsearch-7.17.16-darwin-x86_64.tar.gz.sha512 
+    tar -xzf elasticsearch-7.17.16-darwin-x86_64.tar.gz
+    cd elasticsearch-7.17.16/ 
 
 #### 6.4 To start the elasticsearch
-    ./elasticsearch-8.11.3/bin/elasticsearch
+    ./elasticsearch-7.17.16/bin/elasticsearch
 
 #### 6.5 To install Kibana from archive
-    curl -O https://artifacts.elastic.co/downloads/kibana/kibana-8.11.3-darwin-x86_64.tar.gz
-    curl https://artifacts.elastic.co/downloads/kibana/kibana-8.11.3-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
-    tar -xzf kibana-8.11.3-darwin-x86_64.tar.gz
-    cd kibana-8.11.3/
+    curl -O https://artifacts.elastic.co/downloads/kibana/kibana-7.17.16-darwin-x86_64.tar.gz
+    curl https://artifacts.elastic.co/downloads/kibana/kibana-7.17.16-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
+    tar -xzf kibana-7.17.16-darwin-x86_64.tar.gz
+    cd kibana-7.17.16-darwin-x86_64/
 
 #### 6.6 To start the kibana
-    ./kibana-8.11.3/bin/kibana
-
-#### 6.7 Key parameters to use
-    ELASTICSEARCH_DSL = {
-                "default": {"hosts": "https://elastic:YQqSIlErG=i57zIzz5FH@localhost:9200",
-                "verify_certs": "False",
-                "ssl_assert_fingerprint": "6c4edebe6907f4048b478e52b2dbcaf7ef61c6c1fb51222a39724add42d1f500"}
-    }
+    ./kibana-7.17.16-darwin-x86_64/bin/kibana
 ___
 ___
 ## Production Environment Setup
