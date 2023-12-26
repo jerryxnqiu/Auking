@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'storages',
     'tinymce',
     'scrapers',
+    'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -247,6 +248,13 @@ STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
+
+# Configure ELASTICSEARCH_DSL
+ELASTICSEARCH_DSL = {
+    "default": {"hosts": "https://elastic:YQqSIlErG=i57zIzz5FH@localhost:9200",
+                "verify_certs": "False",
+                "ssl_assert_fingerprint": "6c4edebe6907f4048b478e52b2dbcaf7ef61c6c1fb51222a39724add42d1f500"}
+}
 
 # LOGGING = {
 #     'version': 1,

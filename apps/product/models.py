@@ -489,6 +489,9 @@ def updateProductImage(sender, instance, **kwargs):
 
 def updateIndexCategoryProductBanner():
     
+    # To clear the old records before adding new ones
+    IndexCategoryProductBanner.objects.all().delete()
+
     # To get the max sales item in "category" and "subcategory" from "ProductSKU" table
     categories = ProductSKU.objects.values('category').annotate(
         numOfSubcategories=Count('subCategory', distinct=True)

@@ -19,11 +19,15 @@ constantly==23.10.4
 cryptography==41.0.5
 cssselect==1.2.0
 Django==4.2
+django-elasticsearch-dsl==8.0
 django-recaptcha==3.0.0
 django-redis==5.2.0
 django-redis-sessions==0.6.2
 django-storages==1.14.2
 django-tinymce==3.6.1
+elastic-transport==8.11.0
+elasticsearch==8.11.1
+elasticsearch-dsl==8.11.0
 filelock==3.13.0
 greenlet==3.0.0
 hyperlink==21.0.0

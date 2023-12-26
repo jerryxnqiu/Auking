@@ -116,13 +116,53 @@ ___
     celery -A celery_tasks.tasks worker -l info
 ___
 
-### 5. Use activation email to close the registration loop (https://www.youtube.com/watch?v=iGPPhzhXBFg)
+### 5. To use activation email to close the registration loop (https://www.youtube.com/watch?v=iGPPhzhXBFg)
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_HOST_USER = 'example@gmail.com'
     EMAIL_HOST_PASSWORD = 'password'
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+___
+
+### 6. To use "elasticsearch" as the search engine for the item searching
+#### 6.1 To install JDK
+    brew install openjdk
+
+#### 6.2 For the system Java wrappers to find this JDK, symlink it with
+    sudo ln -sfn /opt/homebrew/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+
+    (Seems optional)
+    If you need to have openjdk first in your PATH, run:
+    % echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc
+
+    For compilers to find openjdk you may need to set:
+    % export CPPFLAGS="-I/opt/homebrew/opt/openjdk/include"
+
+#### 6.3 To install elasticsearch from archive
+    curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.11.3-darwin-x86_64.tar.gz
+    curl https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.11.3-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
+    tar -xzf elasticsearch-8.11.3-darwin-x86_64.tar.gz
+    cd elasticsearch-8.11.3/ 
+
+#### 6.4 To start the elasticsearch
+    ./elasticsearch-8.11.3/bin/elasticsearch
+
+#### 6.5 To install Kibana from archive
+    curl -O https://artifacts.elastic.co/downloads/kibana/kibana-8.11.3-darwin-x86_64.tar.gz
+    curl https://artifacts.elastic.co/downloads/kibana/kibana-8.11.3-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
+    tar -xzf kibana-8.11.3-darwin-x86_64.tar.gz
+    cd kibana-8.11.3/
+
+#### 6.6 To start the kibana
+    ./kibana-8.11.3/bin/kibana
+
+#### 6.7 Key parameters to use
+    ELASTICSEARCH_DSL = {
+                "default": {"hosts": "https://elastic:YQqSIlErG=i57zIzz5FH@localhost:9200",
+                "verify_certs": "False",
+                "ssl_assert_fingerprint": "6c4edebe6907f4048b478e52b2dbcaf7ef61c6c1fb51222a39724add42d1f500"}
+    }
 ___
 ___
 ## Production Environment Setup
@@ -134,7 +174,6 @@ https://medium.com/@aadarshachapagain/setting-up-django-with-mysql-nginx-and-gun
 #### 1.1 To update/upgrade the new linux system 
     sudo apt-get update
     sudo apt-get -y upgrade
-
 
 #### 1.2 To check python version
     python3 --version
@@ -284,6 +323,7 @@ Supervisor is a process control system that enables users to monitor and control
 #### 6.7 To update setting on "gunicorn.conf" if required
     sudo nano /etc/supervisor/conf.d/gunicorn.conf
 ___
+
 ### 7. Nginx
 #### 7.1 To install Nginx
     sudo apt-get install -y nginx
