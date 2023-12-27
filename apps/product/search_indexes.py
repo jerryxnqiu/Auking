@@ -2,7 +2,7 @@ from haystack import indexes
 from .models import ProductSKU
 
 
-class NoteIndex(indexes.SearchIndex, indexes.Indexable):
+class ProductSKUIndex(indexes.SearchIndex, indexes.Indexable):
 
     # indexing fields from the model, "use_template" specifies which fields in the table
     # to create an index file and which fields to index in a file.

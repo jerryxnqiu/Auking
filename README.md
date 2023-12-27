@@ -158,6 +158,11 @@ To work with Haystack, elasticsearch >= 7, < 8 is used
 
 #### 6.6 To start the kibana
     ./kibana-7.17.16-darwin-x86_64/bin/kibana
+
+#### 6.7 To configure security and SSL
+    Set up minimal security
+    Set up basic security
+    Set up basic security plus HTTPS
 ___
 ___
 ## Production Environment Setup
