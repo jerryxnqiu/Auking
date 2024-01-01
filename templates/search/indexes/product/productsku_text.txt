@@ -1,6 +1,10 @@
 {{ object.nameEN }}
+{{ object.name }}
 {{ object.category.nameEN }}
+{{ object.category.name }}
 {{ object.subCategory.nameEN }}
+{{ object.subCategory.name }}
 {{ object.spu.nameEN }}
+{{ object.spu.name }}
 {{ object.brand }}
 {{ object.description }}

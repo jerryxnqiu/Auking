@@ -97,62 +97,57 @@ class ChemistwarehouseProductsSpider(scrapy.Spider):
         # To calculate the page quantity and last page product quantity
         quantityPerPage = 45
         if (maxQuantity % quantityPerPage) > 0:
-            pages = maxQuantity // quantityPerPage + 1
-            lastPageQuantity = maxQuantity % quantityPerPage
+            pageCount = maxQuantity // quantityPerPage + 1
         else:
-            pages = maxQuantity // quantityPerPage
-            lastPageQuantity = quantityPerPage
+            pageCount = maxQuantity // quantityPerPage
 
 
         ###########################################################################################
         # To construct the url, with "start_index" and "chemau20"
-        for pageIndex in range(pages):
+        for pageIndex in range(pageCount):
 
-            if pageIndex == pages:
-                start_index = pageIndex * quantityPerPage + lastPageQuantity
-            else:
-                start_index = pageIndex * quantityPerPage
+            start_index = pageIndex * quantityPerPage
             
-        url = 'https://pds.chemistwarehouse.com.au/search'
-        url += '?identifier=AU'
-        url += '&fh_start_index=0'
-        url += '&fh_location=//catalog01/en_AU/categories<{catalog01_chemau}/categories<{chemau20}'
+            url = 'https://pds.chemistwarehouse.com.au/search'
+            url += '?identifier=AU'
+            url += '&fh_start_index=0'
+            url += '&fh_location=//catalog01/en_AU/categories<{catalog01_chemau}/categories<{chemau20}'
 
-        # url = re.sub(r"(?<=fh_start_index=)\d+", str(start_index), url)
-        url = re.sub(r"(?<=chemau)\d+", str(chemauCode), url)
+            url = re.sub(r"(?<=fh_start_index=)\d+", str(start_index), url)
+            url = re.sub(r"(?<=chemau)\d+", str(chemauCode), url)
 
-        print(maxQuantity, start_index)
+            print(maxQuantity, start_index, url)
 
-        ###########################################################################################
-        # To construct the header
-        headers = {
-            'Accept': 'application/json, text/plain, */*',
-            'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-            'Origin': 'https://www.chemistwarehouse.com.au',
-            'Pragma': 'no-cache',
-            'Referer': 'https://www.chemistwarehouse.com.au/',
-            'Sec-Fetch-Dest': 'empty',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Site': 'same-site',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
-            'sec-ch-ua': '"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"macOS"',
-        }
+            ###########################################################################################
+            # To construct the header
+            headers = {
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive',
+                'Origin': 'https://www.chemistwarehouse.com.au',
+                'Pragma': 'no-cache',
+                'Referer': 'https://www.chemistwarehouse.com.au/',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-site',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
+                'sec-ch-ua': '"Chromium";v="118", "Google Chrome";v="118", "Not=A?Brand";v="99"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"macOS"',
+            }
 
-        yield scrapy.Request(
-            url=url,
-            headers=headers,
-            meta={
-                "playwright": True
-                },
-            callback=self.parseRootCategoryPageAPI,
-            cb_kwargs={
-                'headers': headers,
-                }
-        )
+            yield scrapy.Request(
+                url=url,
+                headers=headers,
+                meta={
+                    "playwright": True
+                    },
+                callback=self.parseRootCategoryPageAPI,
+                cb_kwargs={
+                    'headers': headers,
+                    }
+            )
 
 
     def parseRootCategoryPageAPI(self, response, headers):
@@ -348,6 +343,10 @@ class ChemistwarehouseProductsSpider(scrapy.Spider):
                 subCategory = lv2BreadcrumbsName
             spu = self.spuGenerationFunction(productBrand, lv2BreadcrumbsName, lv3BreadcrumbsName, lv4BreadcrumbsName, lv5BreadcrumbsName)
 
+        else:
+            category = "cosmetics"
+            subCategory = lv1BreadcrumbsName
+            spu = lv1BreadcrumbsName
 
         print(category, subCategory, spu)
         print(productId, productSecondId, productName, productBrand, productThumbnailImageUrl, productPrice, productTotalVote, productStarRating)
@@ -356,10 +355,19 @@ class ChemistwarehouseProductsSpider(scrapy.Spider):
         # To get the product page images
         # get the image network path and save the picture
         productImageOriginalUrls = [productThumbnailImageUrl]
-        for urlItem in response.xpath('//div[@class="pi_slide"]'):
-            productImageOriginalUrls.append(urlItem.xpath('.//a/@href').get())
-        
+
+        # If it has valid image path
+        if response.xpath('//div[@class="pi_slide"]'):
+            
+            for urlItem in response.xpath('//div[@class="pi_slide"]'):
+                productImageOriginalUrls.append(urlItem.xpath('.//a/@href').get())
+
+        # If it is just a placeholder and no image
+        else:
+            productImageOriginalUrls = [response.xpath('//div[@id="product_images"]//img/@src').get()]
+
         productImageNewUrls = []
+        print(productImageOriginalUrls)
         for urlItem in productImageOriginalUrls:
             imageName = urlItem.split("/")[-1]
             productId = "AukingCW" + urlItem.split("/")[-2]
@@ -556,6 +564,12 @@ class ChemistwarehouseProductsSpider(scrapy.Spider):
             
             # To round up with 1 decimal point
             weight = number * 1.4
+        
+        # To set unit and weight if no match in above
+        else:
+            unit = "件"
+            weight = 1
+
 
         # To make sure the weight is at least 0.4Kg
         try:

@@ -22,6 +22,7 @@ from django.urls import path, re_path, include
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^tinymce/', include('tinymce.urls')),                             ## rich text editor
+    re_path(r'^search', include('haystack.urls')), 
     re_path(r'^user/', include(('user.urls', 'user'), namespace='user')),       ## user module
     re_path(r'^cart/', include(('cart.urls', 'cart'), namespace='cart')),       ## cart module
     re_path(r'^order/', include(('order.urls', 'order'), namespace='order')),   ## order module

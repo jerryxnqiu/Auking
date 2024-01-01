@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} 爱优品礼品店-商品搜索结果列表 {% endblock title %}
+
+{% block topfiles %}
+{% endblock topfiles %}
+
+{% block body %}
+<div class="container">
+	<div class="container">
+		<div class="breadcrumb">
+			<a href="{% url 'product:index' %}" class="link-dark" style="text-decoration: none;">全部分类</a>
+			<span class="ps-1 pe-1">></span>
+			<span> {{ query }} </span>
+			<span class="ps-1 pe-1">></span>
+			<span> 搜索结果如下</span>
+		</div>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-3 col-md-4">
+                <div class="container">
+					<div class="d-flex border justify-content-center">
+						<span>新品推荐</span>
+					</div>
+				</div>
+				<div class="container">
+					{% for item in page %}
+                        {% if forloop.counter <= 2 %}
+                            <div class="container border" style="margin: 0px; padding: 0px;">
+                                <a href="{% url 'product:detail' item.object.id %}">
+                                    <img src="{{ item.object.image.url }}" class="d-flex justify-content-center" style="width: 100%;">
+                                </a>
+                                <a href="{% url 'product:detail' item.object.id %}" class="link-dark" style="text-decoration: none;">
+                                    <span class="d-flex justify-content-center" style="margin: 0px 10px;">{{ item.object.name }}</span>
+                                </a>
+                                <div class="prize" style="margin: 0px 10px;">￥{{ item.object.price }}</div>
+                            </div>
+                        {% endif %}
+					{% endfor %}
+				</div>
+			</div>
+			<div class="col-lg-9 col-md-8">
+				<div class="container text-center" style="padding-bottom: 30px;">
+					<div class="row row-cols-xl-5 row-cols-lg-3 row-cols-sm-2 justify-content-center align-items-center">
+						{% for item in page %}
+						<div class="col border d-flex justify-content-center align-items-center" style="height: 160px;">
+							<a href="{% url 'product:detail' item.object.id  %}" style="text-decoration:none;">
+								<div class="container d-flex justify-content-center align-items-center" style="height: 100px; width: 150px; padding-top: 5px;">
+									<img src="{{ item.object.image.url }}" alt width="100px">
+								</div>
+								<div class="container d-flex justify-content-center align-items-center" style="height: 15px; width: 150px; padding-top: 5px;">
+									<div class="link-dark lh-1" style="font-size: small; font-weight: bold;">¥ {{ item.object.price }}</div>
+									<img src="{% static 'images/shoppingCart.png' %}" style="padding-left: 3px; height: 15px;">
+								</div>
+								<div class="container d-flex justify-content-center align-items-center" style="height: 35px; width: 150px; padding: 5px 0px;">
+									<div class="link-dark lh-1" style="font-size: 11px;">{{ item.object.name }}</div>
+								</div>
+							</a>
+						</div>
+						{% endfor %}
+					</div>
+				</div>
+				<div class="container text-center">
+					{% if page.has_previous %}
+					<a class="link-dark" style="text-decoration:none;" href="/search?q={{ query }}&page={{ page.previous_page_number }}"><上一页</a>
+					{% endif %}
+
+					{% for pindex in paginator.page_range %}
+						{% if pindex == page.number %}
+							<a class="link-dark" style="font-weight: bolder;" href="/search?q={{ query }}&page={{ pindex }}" class="active">{{ pindex }}</a>
+						{% else %}
+							<a class="link-dark" style="text-decoration:none;" href="/search?q={{ query }}&page={{ pindex }}">{{ pindex }}</a>
+						{% endif %}
+					{% endfor %}
+					
+					{% if page.has_next %}
+					<a class="link-dark" style="text-decoration:none;" href="/search?q={{ query }}&page={{ page.next_page_number }}">下一页></a>
+					{% endif %}
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock body %}

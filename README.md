@@ -163,6 +163,8 @@ To work with Haystack, elasticsearch >= 7, < 8 is used
     Set up minimal security
     Set up basic security
     Set up basic security plus HTTPS
+
+    path for "ca_certs" needs to be updated
 ___
 ___
 ## Production Environment Setup

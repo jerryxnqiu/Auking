@@ -226,7 +226,7 @@ class ProductFromScrapyAdmin(admin.ModelAdmin):
                     "unit", "imageThumbNail", "imageProductPage", "weight", "logisticsCategoryAuExpress", "logisticsCategoryEWE")
     list_filter = ("category", "subCategory", "spu", "lv1BreadcrumbsName", "lv2BreadcrumbsName", "lv3BreadcrumbsName", "lv4BreadcrumbsName", "lv5BreadcrumbsName",\
                    "brand", "weight", "logisticsCategoryAuExpress", "logisticsCategoryEWE")
-    search_fields = ("sourceName", "sourceNameAndId", "name", "nameEN", "brand", "description")
+    search_fields = ("sourceName", "sourceNameAndId", "name", "brand", "description")
 
     def get_urls(self):
 
