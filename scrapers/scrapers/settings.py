@@ -117,6 +117,6 @@ PLAYWRIGHT_LAUNCH_OPTIONS = {
 
 PLAYWRIGHT_DEFAULT_NAVIGATION_TIMEOUT = 100 * 1000
 
-
-LOG_FILE = 'scrapylog.txt'
+from datetime import date
+LOG_FILE = 'scrapylog_{}.txt'.format(date.today())
 LOG_LEVEL = 'DEBUG'

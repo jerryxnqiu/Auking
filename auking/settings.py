@@ -15,15 +15,16 @@ import sys
 import os
 from dotenv import load_dotenv
 
-# Initialise environment variables
+##### To initialise environment variables
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+##### To build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 
 
-# Quick-start development settings - unsuitable for production
+##### Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -32,11 +33,36 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+##### To add extra Securtiy control
+# See https://www.cloudwithdjango.com/django-web-application-security-checklist/
+# Cross-site Scripting (XSS)
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# # SSL redirect
+# SECURE_SSL_REDIRECT = True
+
+# # HTTP Strict Transport Security (HSTS)
+# SECURE_HSTS_SECONDS = 86400
+# SECURE_HSTS_PRELOAD = True
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# # Cross-site request forgery (CSRF) protection
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+
+# # Django-defender configuraiton
+# DEFENDER_LOGIN_FAILURE_LIMIT = 3
+# DEFENDER_LOGIN_FAILURE_LIMIT_IP = 3
+# DEFENDER_COOLOFF_TIME = 300
+
+
+##### To set for "allowed hosts"
 ALLOWED_HOSTS = ['auking.com.au', '54.221.105.98', 'localhost', '127.0.0.1']
 
 
-# Application definition
-
+##### To setup Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,6 +78,9 @@ INSTALLED_APPS = [
     'order',
 
     # To add new feature application
+    'sslserver',
+    'defender',
+    'debug_toolbar',
     'storages',
     'tinymce',
     'scrapers',
@@ -66,6 +95,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # To add new feature middleware
+    'defender.middleware.FailedLoginMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'auking.urls'
@@ -89,7 +122,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'auking.wsgi.application'
 
 
-# Database
+##### To setup Database configuration
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
@@ -103,10 +136,12 @@ DATABASES = {
     }
 }
 
-# django authentication model - have to set this before can do migrations and migrate
+
+##### To setup django authentication model - have to set this before can do migrations and migrate
 AUTH_USER_MODEL = "user.User"
 
-# Password validation
+
+##### To setup Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -125,7 +160,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+##### To setup Internationalization configuration
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-au'
@@ -134,10 +169,12 @@ TIME_ZONE = 'Australia/Sydney'
 
 USE_I18N = True
 
-USE_TZ = True
+# If USE_TZ = False, the |utc filter (<p>Time in UTC: {{ datetime_value|utc }}</p>) doesn't perform any conversion, 
+# and the displayed time in UTC is the same as the original time in Sydney. 
+USE_TZ = False
 
 
-# Configure static files and storage files location
+##### To configure static files and storage files location
 USE_S3 = os.getenv("USE_S3")
 
 if USE_S3:
@@ -178,14 +215,13 @@ else:
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 
-# Default primary key field type
+##### To setup default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
-# Rich text editor configuration
+##### To setup rich text editor configuration
 TINYMCE_JS_URL = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js'
 TINYMCE_COMPRESSOR = False
 TINYMCE_APIKEY = os.getenv("TINYMCE_APIKEY")
@@ -212,8 +248,7 @@ TINYMCE_DEFAULT_CONFIG = {
 }
 
 
-
-# Sending email configuration
+##### To setup sending email configuration
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
@@ -222,7 +257,7 @@ EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
 
 
-# Django cache setting, in local machine
+##### To setup for Django cache setting, in local machine
 CACHES = {
     "default": {
         "BACKEND": os.getenv("CACHE_BACKEND"),
@@ -233,23 +268,24 @@ CACHES = {
     }
 }
 
-# Configure the session storage，
+
+##### To configure the session storage，
 # Default location is at django database session table
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
 
-## Configure the login URL as the default jump address for login_required()
+##### To configure the login URL as the default jump address for login_required()
 LOGIN_URL = '/user/login'
 
 
-# Configure the STRIPE access details
+##### To configure the STRIPE access details
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 
 
-# To configure Haystack
+##### To configure Haystack
 HAYSTACK_CONNECTIONS = {
     "default": {
         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
@@ -265,6 +301,16 @@ HAYSTACK_CONNECTIONS = {
 
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
+
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
+]
+
+
+##### To setup logging configuration
 # LOGGING = {
 #     'version': 1,
 #     'disable_existing_loggers': False,

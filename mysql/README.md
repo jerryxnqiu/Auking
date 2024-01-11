@@ -3,35 +3,25 @@
 
 
 ## To install, run
-```sql
-- brew install mysql
-```
+    - brew install mysql
 
 ## To launch the service
-```sql
-- brew services start mysql
-```
+    - brew services start mysql
 
 ## If need to run in background, can do:
-```sql
-- mysql.server start
-- mysql.server stop
-```
+    - mysql.server start
+    - mysql.server stop
+
+## To login mysql panel
+    - mysql -u root -p
 
 ## Display options
-```sql
-- show databases;
-- show tables;
-- use <database name>;
-```
+    - show databases;
+    - show tables;
+    - use <database name>;
 
 ## To check the host of user=root, if "%", can be connected outside docker, if "localhost", can only be connected within docker
-```sql
-- select user, host from mysql.user;
-```
+    - select user, host from mysql.user;
 
 ## others
-```sql
-- update mysql.user set host='%' where user='root'
-- mysql -u root -p
-```
+    - update mysql.user set host='%' where user='root'

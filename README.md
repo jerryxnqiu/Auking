@@ -60,7 +60,7 @@ ___
     Email address: admin@auking.com.au
 
 #### 1.4 To collect all static files into a folder specified in settings.py - STATIC_ROOT 
-    python manage.py collectstatic
+    python manage.py collectstatic --noinput
 
 #### 1.5 To run development mode server 
     python manage.py runserver
@@ -179,6 +179,16 @@ https://medium.com/@aadarshachapagain/setting-up-django-with-mysql-nginx-and-gun
 
 #### 1.2 To check python version
     python3 --version
+___
+
+### 2. Docker setup
+#### 2.1
+
+
+
+
+
+
 
 #### 1.3 To download the repository from Github
     git clone repository
