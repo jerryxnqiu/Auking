@@ -24,9 +24,28 @@ class ChemistwarehouseProductsSpider(scrapy.Spider):
     3 root categories
     /shop-online/256/health (3008)
     /shop-online/259/personal-care (7157)
+    
     /shop-online/257/beauty (9516)
+
+    12 categories under beauty
+    /shop-online/230/acne (63)
+    /shop-online/648/cosmetics (3609)
+    /shop-online/542/fragrances (3117)
+    /shop-online/665/skin-care (2444)
+    /shop-online/3722/beauty-miscellaneous (1)
+    /shop-online/233/anti-itch (10)
+    /shop-online/236/cleansers (27)
+    /shop-online/232/hair-removal (95)
+    /shop-online/1023/swisspers (29)
+    /shop-online/3621/beauty-accessories (31)
+    /shop-online/770/scar-and-stretchmark-treatment (11)
+    /shop-online/5516/teeth-whitening (9)
+
+
+    "/shop-online/256/health", "/shop-online/259/personal-care", "/shop-online/257/beauty"
     '''
-    start_urls = ["/shop-online/256/health", "/shop-online/259/personal-care", "/shop-online/257/beauty"]
+    
+    start_urls = ["/shop-online/542/fragrances"]
 
     def spuGenerationFunction(self, productBrand, lv2BreadcrumbsName, lv3BreadcrumbsName, lv4BreadcrumbsName, lv5BreadcrumbsName):
 
@@ -483,7 +502,7 @@ class ChemistwarehouseProductsSpider(scrapy.Spider):
 
         #####################################################################################################
         # To calculate the price, profit and exchange rate
-        price = math.ceil(float(productPrice) * 1.1 * 4.8)
+        price = int(math.ceil(float(productPrice) * 1.1 * 4.8))
         item["price"] = price
 
         # To calculate the GST

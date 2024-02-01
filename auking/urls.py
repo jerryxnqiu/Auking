@@ -19,12 +19,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, re_path, include
 
+from schema_graph.views import Schema
+
 urlpatterns = [
     re_path(r'^aukingadmin/defender/', include('defender.urls')),
     re_path(r'^aukingadmin/', admin.site.urls),
     re_path(r'^tinymce/', include('tinymce.urls')),                             ## rich text editor
     re_path(r'^search', include('haystack.urls')),
     re_path(r'^__debug__/', include("debug_toolbar.urls")),
+    re_path(r'schema/', Schema.as_view()),
     
     re_path(r'^user/', include(('user.urls', 'user'), namespace='user')),       ## user module
     re_path(r'^cart/', include(('cart.urls', 'cart'), namespace='cart')),       ## cart module

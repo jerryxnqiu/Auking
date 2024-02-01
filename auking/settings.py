@@ -31,7 +31,14 @@ sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(int(os.getenv("DEBUG", 0)))
+
+# Django Superuser setup
+DJANGO_SUPERUSER = {
+    "DJANGO_SUPERUSER_USERNAME": os.getenv("DJANGO_SUPERUSER_USERNAME"),
+    "DJANGO_SUPERUSER_EMAIL": os.getenv("DJANGO_SUPERUSER_EMAIL"),
+    "DJANGO_SUPERUSER_PASSWORD": os.getenv("DJANGO_SUPERUSER_PASSWORD"),
+}
 
 
 ##### To add extra Securtiy control
@@ -56,14 +63,20 @@ DEBUG = True
 # DEFENDER_LOGIN_FAILURE_LIMIT = 3
 # DEFENDER_LOGIN_FAILURE_LIMIT_IP = 3
 # DEFENDER_COOLOFF_TIME = 300
+DEFENDER_REDIS_URL = "redis://redis:6379/0"
 
 
 ##### To set for "allowed hosts"
-ALLOWED_HOSTS = ['auking.com.au', '54.221.105.98', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = []
 
 
 ##### To setup Application definition
 INSTALLED_APPS = [
+    
+    # To add module for Django-admin-interface
+    'admin_interface',
+    'colorfield',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -78,6 +91,10 @@ INSTALLED_APPS = [
     'order',
 
     # To add new feature application
+    'request',
+    'schema_graph',
+    'easyaudit',
+    'login_history',
     'sslserver',
     'defender',
     'debug_toolbar',
@@ -95,10 +112,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
 
     # To add new feature middleware
     'defender.middleware.FailedLoginMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
+
+    'request.middleware.RequestMiddleware',
 ]
 
 ROOT_URLCONF = 'auking.urls'
@@ -127,12 +148,12 @@ WSGI_APPLICATION = 'auking.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv("DATABASE_ENGINE"),
-        'NAME': os.getenv("DATABASE_NAME"),
-        'USER': os.getenv("DATABASE_USER"),
-        'PASSWORD': os.getenv("DATABASE_PASSWORD"),
-        'HOST': os.getenv("DATABASE_HOST"),
-        'PORT': os.getenv("DATABASE_PORT"),
+        'ENGINE': os.getenv("MYSQL_ENGINE"),
+        'NAME': os.getenv("MYSQL_DATABASE"),
+        'USER': os.getenv("MYSQL_USER"),
+        'PASSWORD': os.getenv("MYSQL_PASSWORD"),
+        'HOST': os.getenv("MYSQL_HOST"),
+        'PORT': os.getenv("MYSQL_PORT"),
     }
 }
 
@@ -302,11 +323,27 @@ HAYSTACK_CONNECTIONS = {
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 
-
+##### To configure DEBUG_TOOLBAR_PANELS
 INTERNAL_IPS = [
     # ...
     "127.0.0.1",
+    "https://auking.s3.ap-southeast-2.amazonaws.com/",
     # ...
+]
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 
 

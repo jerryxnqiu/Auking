@@ -15,6 +15,6 @@ class Command(BaseCommand):
 
         process = CrawlerProcess(settings=crawler_settings)
 
-        process.crawl(ChemistwarehouseProductsSpider)
-        # process.crawl(TargetLegoSpider)
+        # process.crawl(ChemistwarehouseProductsSpider)
+        process.crawl(TargetLegoSpider)
         process.start()

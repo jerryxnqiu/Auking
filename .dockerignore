@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# Docker
+.docker
+
+# Python
+.venv/
+.env
+./__pycache__/
+./*/__pycache__/
+./*/*/__pycache__/
+./*/*/*/__pycache__/
+
+# Local data
+scrapylog_2024-01-21.txt
+scrapylog_2024-01-22.txt
+scrapylog_2024-01-23.txt
+README.md
+scrapyDownloadImages/

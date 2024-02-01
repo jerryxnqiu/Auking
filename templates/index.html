@@ -71,9 +71,9 @@
 						<li class="nav-item">
 							<span>|</span>
 								{% if productBanner.subCategory.nameEN == "Lego" %}
-								<a href="{% url 'product:spuList' spuName=productBanner.spu.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.spu.name }}</a>
+								<a href="{% url 'product:spuList' spuName=productBanner.spu.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.spu.nameEN }}</a>
 								{% else %}
-								<a href="{% url 'product:subCategoryList' subCategoryName=productBanner.subCategory.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.subCategory.name }}</a>
+								<a href="{% url 'product:subCategoryList' subCategoryName=productBanner.subCategory.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.subCategory.nameEN }}</a>
 								{% endif %}
 						</li>
 						{% endfor %}

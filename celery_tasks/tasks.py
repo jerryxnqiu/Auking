@@ -15,7 +15,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'auking.settings')
 django.setup()
 #######################################################################################################################
 
-app = Celery('celery_tasks.tasks', broker='redis://127.0.0.1:6379/8')
+app = Celery('celery_tasks.tasks', broker='redis://redis:6379/8')
 
 
 #######################################################################################################################

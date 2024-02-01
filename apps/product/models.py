@@ -155,7 +155,7 @@ class ProductCategory(BaseModel):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.name
+        return self.nameEN
 
 
 class ProductSubCategory(BaseModel):
@@ -173,7 +173,7 @@ class ProductSubCategory(BaseModel):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.name
+        return self.nameEN
 
 
 class ProductSPU(BaseModel):
@@ -193,7 +193,7 @@ class ProductSPU(BaseModel):
         verbose_name_plural = verbose_name
     
     def __str__(self):
-        return self.name
+        return self.nameEN
 
 
 class ProductSKU(BaseModel):
@@ -243,7 +243,7 @@ class ProductSKU(BaseModel):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.name
+        return self.nameEN
 
 
 class ProductImage(BaseModel):
@@ -259,7 +259,7 @@ class ProductImage(BaseModel):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.sku.name
+        return self.sku.nameEN
 
 
 #######################################################################################################################
@@ -325,7 +325,7 @@ class IndexCategoryProductBanner(BaseModel):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.sku.name
+        return self.sku.nameEN
 
 
 class BulkPurchaseDiscount(BaseModel):
@@ -344,7 +344,7 @@ class BulkPurchaseDiscount(BaseModel):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.subCategory.name
+        return self.subCategory.nameEN
 
 
 @receiver(post_save, sender=ProductFromScrapy)
@@ -354,7 +354,7 @@ def updateProductSubCategory(sender, instance, **kwargs):
     subCategoryValue = instance.subCategory
 
     # To check if the value exists
-    existingProductSubCategoryInstance = ProductSubCategory.objects.filter(name=subCategoryValue).first()
+    existingProductSubCategoryInstance = ProductSubCategory.objects.filter(nameEN=subCategoryValue).first()
 
     if existingProductSubCategoryInstance:
         # If the value exists, update the fieldB value
@@ -377,19 +377,19 @@ def updateProductSPU(sender, instance, **kwargs):
     spuValue = instance.spu
 
     # To check if the value exists
-    existingProductSPUInstance = ProductSPU.objects.filter(name=spuValue).first()
+    existingProductSPUInstance = ProductSPU.objects.filter(nameEN=spuValue).first()
 
     if existingProductSPUInstance:
         # If the value exists, update the fieldB value
         existingProductSPUInstance.category = ProductCategory.objects.get(nameEN=categoryValue)
-        existingProductSPUInstance.subCategory = ProductSubCategory.objects.get(name=subCategoryValue)
+        existingProductSPUInstance.subCategory = ProductSubCategory.objects.get(nameEN=subCategoryValue)
         existingProductSPUInstance.name = spuValue
         existingProductSPUInstance.nameEN = spuValue
         existingProductSPUInstance.save()
     else:
         # If the value doesn't exist, create a new Model1B instance
         newProductSPUInstance = ProductSPU(category=ProductCategory.objects.get(nameEN=categoryValue),
-                                           subCategory=ProductSubCategory.objects.get(name=subCategoryValue),
+                                           subCategory=ProductSubCategory.objects.get(nameEN=subCategoryValue),
                                            name=spuValue, 
                                            nameEN=spuValue)
         newProductSPUInstance.save()
@@ -443,8 +443,8 @@ def updateProductSKU(sender, instance, **kwargs):
     else:
         # If the value doesn't exist, create a new Model1B instance
         newProductSKUInstance = ProductSKU(category=ProductCategory.objects.get(nameEN=categoryValue),
-                                           subCategory=ProductSubCategory.objects.get(name=subCategoryValue),
-                                           spu=ProductSPU.objects.get(name=spuValue),
+                                           subCategory=ProductSubCategory.objects.get(nameEN=subCategoryValue),
+                                           spu=ProductSPU.objects.get(nameEN=spuValue),
                                            sourceNameAndId=sourceNameAndIdValue,
                                            name=nameValue, 
                                            nameEN=nameValue,
@@ -477,12 +477,12 @@ def updateProductImage(sender, instance, **kwargs):
 
         if existingProductImageInstance:
             # If the value exists, update the fieldB value
-            existingProductImageInstance.sku = ProductSKU.objects.get(name=nameValue)
+            existingProductImageInstance.sku = ProductSKU.objects.get(nameEN=nameValue)
             existingProductImageInstance.image = imageProductPageValue
             existingProductImageInstance.save()
         else:
             # If the value doesn't exist, create a new Model1B instance
-            newProductImageInstance = ProductImage(sku=ProductSKU.objects.get(name=nameValue),
+            newProductImageInstance = ProductImage(sku=ProductSKU.objects.get(nameEN=nameValue),
                                                    image=imageProductPageValue)
             newProductImageInstance.save()
 
@@ -560,10 +560,10 @@ def updateIndexCategoryProductBanner():
                     displayCategory = 0
 
                 indexCategoryProductBannerinstance, _ = IndexCategoryProductBanner.objects.get_or_create(
-                    category=ProductCategory.objects.get(name=ProductSKU.objects.get(name=item).category),
-                    subCategory=ProductSubCategory.objects.get(name=ProductSKU.objects.get(name=item).subCategory),
-                    spu=ProductSPU.objects.get(name=ProductSKU.objects.get(name=item).spu),
-                    sku=ProductSKU.objects.get(name=item),
+                    category=ProductCategory.objects.get(nameEN=ProductSKU.objects.get(nameEN=item).category),
+                    subCategory=ProductSubCategory.objects.get(nameEN=ProductSKU.objects.get(nameEN=item).subCategory),
+                    spu=ProductSPU.objects.get(nameEN=ProductSKU.objects.get(nameEN=item).spu),
+                    sku=ProductSKU.objects.get(nameEN=item),
                     displayCategory=displayCategory,
                     index=itemIndex,
                 )
@@ -572,6 +572,57 @@ def updateIndexCategoryProductBanner():
                 itemIndex += 1
 
         else:
-            print("more")
 
-    
+            # To select the top sales items from each subcategory to fill the 14 slots
+            subcategories = ProductSKU.objects.filter(
+                category=category
+            ).values('subCategory').annotate(
+                sales=Max('sales')
+            ).order_by('-sales')
+
+
+            itemList = []
+            for subcategory in subcategories:
+                subcategoryName = subcategory['subCategory']
+                
+                topItem = ProductSKU.objects.filter(
+                    category=category,
+                    subCategory=subcategoryName,
+                    sales=subcategory['sales']
+                ).order_by('-sales')[0]
+
+                itemList.append(topItem)
+
+            # To update the "IndexCategoryProductBanner" table
+            # Rules are:
+            # 1. 1 - 10, set to "image",
+            # 2. 11 - 14, set to "title"
+            
+            itemIndex = 0
+            imageOrTitle = "image"
+            itemList = sorted(itemList, key=lambda x: x.sales, reverse=True)
+            itemList = itemList[:14]
+
+            for item in itemList:
+                
+                if imageOrTitle == "image":
+                    displayCategory = 1
+                else:
+                    displayCategory = 0
+
+                if itemIndex == 10:
+                    itemIndex = 0
+                    imageOrTitle = "title"
+                    displayCategory = 0
+
+                indexCategoryProductBannerinstance, _ = IndexCategoryProductBanner.objects.get_or_create(
+                    category=ProductCategory.objects.get(nameEN=ProductSKU.objects.get(nameEN=item).category),
+                    subCategory=ProductSubCategory.objects.get(nameEN=ProductSKU.objects.get(nameEN=item).subCategory),
+                    spu=ProductSPU.objects.get(nameEN=ProductSKU.objects.get(nameEN=item).spu),
+                    sku=ProductSKU.objects.get(nameEN=item),
+                    displayCategory=displayCategory,
+                    index=itemIndex,
+                )
+                indexCategoryProductBannerinstance.save()
+                print(displayCategory)
+                itemIndex += 1

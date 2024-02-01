@@ -185,11 +185,6 @@ ___
 #### 2.1
 
 
-
-
-
-
-
 #### 1.3 To download the repository from Github
     git clone repository
 
