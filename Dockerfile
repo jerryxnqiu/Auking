@@ -15,6 +15,7 @@ EXPOSE 8000
 # To install system dependencies
 RUN apt-get update \
     && apt-get install -y \
+        curl \
         redis-tools \
         python3-venv \
         python3-dev \
@@ -35,6 +36,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-RUN chmod +x /auking/entrypoint.sh
-
-ENTRYPOINT [ "/auking/entrypoint.sh" ]
+RUN chmod +x /auking/entrypointDjango.sh

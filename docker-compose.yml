@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
 
+  # MySQL Database Service
   db:
     image: mysql:8.0
     container_name: mysqlContainer
@@ -21,17 +22,21 @@ services:
       timeout: 20s
       retries: 10
 
+  # Redis Service
   redis:
     image: redis:7.0.5-alpine 
     restart: always
     ports:
       - "6379:6379"
     container_name: redisContainer
+    volumes:
+      - redisData:/data
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       timeout: 20s
       retries: 10
 
+  # Django Service
   web:
     build:
       context: .
@@ -42,6 +47,7 @@ services:
       - .:/auking
     image: django:aukingDjango
     container_name: djangoContainer
+    command: /auking/entrypointDjango.sh
     restart: always
     env_file:
       - .env
@@ -50,6 +56,55 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-  
+
+  # Celery Service
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/auking
+    image: celery:aukingCelery
+    container_name: celeryContainer
+    command: /auking/entrypointCelery.sh
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Elasticsearch Service
+  elasticsearch:
+    image: elasticsearch:7.17.17
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=elasticsearch-docker-cluster
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: always
+    volumes:
+      - elasticsearchData:/usr/share/elasticsearch/data
+
+  # Kibana Service
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.17
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    restart: always
+
+
+
+# Define a named volume for MySQL data storage
 volumes:
   mysqlData:
+  elasticsearchData:
+  redisData:

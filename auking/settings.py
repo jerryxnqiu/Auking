@@ -310,13 +310,8 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 HAYSTACK_CONNECTIONS = {
     "default": {
         "ENGINE": "haystack.backends.elasticsearch7_backend.Elasticsearch7SearchEngine",
-        "URL": "https://elastic:YQqSIlErG=i57zIzz5FH@localhost:9200",
+        "URL": "http://elasticsearch:9200",
         "INDEX_NAME": "productsku",
-        "KWARGS": {
-            "use_ssl": True,
-            "verify_certs": True,
-            "ca_certs": "/Users/jerryqiu/kibana-7.17.16-darwin-x86_64/config/elasticsearch-ca.pem"
-        }
     },
 }
 

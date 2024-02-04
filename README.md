@@ -47,22 +47,26 @@ ___
 ### Technologies used and Development Environment Setup (MacOS):
 
 ### 1. Django
-#### 1.1 To create new migrations based on the changes you have made to your models
+#### 1.1 To setup Django project and Apps
+    django-admin startproject auking .
+    python manage.py startapp Apps
+
+#### 1.2 To create new migrations based on the changes you have made to your models
     python manage.py makemigrations
 
-#### 1.2 To apply and unapply migrations 
+#### 1.3 To apply and unapply migrations 
     python manage.py migrate
 
-#### 1.3 To create super user 
+#### 1.4 To create super user 
     python manage.py createsuperuser
     Username: admin
     Password: admin
     Email address: admin@auking.com.au
 
-#### 1.4 To collect all static files into a folder specified in settings.py - STATIC_ROOT 
+#### 1.5 To collect all static files into a folder specified in settings.py - STATIC_ROOT 
     python manage.py collectstatic --noinput
 
-#### 1.5 To run development mode server 
+#### 1.6 To run development mode server 
     python manage.py runserver
 ___
 
@@ -165,9 +169,39 @@ To work with Haystack, elasticsearch >= 7, < 8 is used
     Set up basic security plus HTTPS
 
     path for "ca_certs" needs to be updated
+
+#### 6.8 To building the index file
+    python manage.py rebuild_index
+___
+
+### 7. To run the crawling scripts and prepare the mysql dump files
+scrapy files are in scrapers/ folder and images will be saved to scrapyDownloadingImages/ folder
+
+#### 7.1 To run the scrapy scripts
+    python manage.py crawl
+
+#### 7.2 To run mysqldump commands in MacOS and save results
+    mysqldump -u root -p auking <table in database auking> > ./Desktop/Auking/mysqlInitializationScripts/001_tableName.sql
 ___
 ___
-## Production Environment Setup
+### Technologies used and Development Environment Setup (MacOS using Docker Desktop):
+
+### 1. To prepare Dockerfile
+    TBC
+
+### 2. To prepare docker-compose.yml
+    TBC
+
+### 3. To run the mysql dump files inside MySQL container
+    mysql -u <MySQL username> -p <database name> < ./mysqlInitializationScripts/001_tableName_dump.sql
+
+
+
+
+
+___
+___
+### Production Environment Setup
 ![productionArchitecture](static/images/productionArchitecture.png)
 
 https://medium.com/@aadarshachapagain/setting-up-django-with-mysql-nginx-and-gunicorn-on-ubuntu-18-04-c23e1334a17

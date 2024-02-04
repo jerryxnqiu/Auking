@@ -64,6 +64,7 @@ db.sqlite3
 db.sqlite3-journal
 *_initial.py
 *.DS_Store*
+scrapyLogs/
 scrapyDownloadImages/
 mysqlInitializationScripts/
 productSKU/
