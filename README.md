@@ -210,6 +210,7 @@ ___
 https://medium.com/@aadarshachapagain/setting-up-django-with-mysql-nginx-and-gunicorn-on-ubuntu-18-04-c23e1334a17
 
 ### 1. Docker and Docker Compose setup
+https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 #### 1.1 Set up Docker's apt repository.
     # Add Docker's official GPG key:
     sudo apt-get update
