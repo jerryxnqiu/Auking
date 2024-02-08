@@ -67,7 +67,7 @@ DEFENDER_REDIS_URL = "redis://redis:6379/0"
 
 
 ##### To set for "allowed hosts"
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(" ")
 
 
 ##### To setup Application definition

@@ -21,7 +21,6 @@ RUN apt-get update \
         python3-dev \
         default-libmysqlclient-dev \
         build-essential \
-        supervisor \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get update \
@@ -32,7 +31,7 @@ ENV PATH="/venv/bin:$PATH"
 
 COPY requirements.txt requirements.txt
 
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache-dir
 
 COPY . .
 
