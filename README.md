@@ -227,7 +227,7 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     sudo apt-get update
 
 #### 1.2 Install the Docker packages.
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
 
 
 ### 2. Docker and Docker Compose setup
@@ -237,4 +237,7 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     password: Github token
 
 
-
+### 3. To copy .env file to remote server and update EC2 IP address
+    sudo nano .env
+    sudo nano nginx.conf
+    sudo docker-compose -f docker-compose.prod.yml up
