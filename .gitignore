@@ -66,7 +66,6 @@ db.sqlite3-journal
 *.DS_Store*
 scrapyLogs/
 scrapyDownloadImages/
-mysqlInitializationScripts/
 productSKU/
 scrapylog*.txt
 

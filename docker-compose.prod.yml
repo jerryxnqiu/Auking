@@ -106,6 +106,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.Nginx
+    image: nginx:aukingNginx
+    container_name: nginxContainer
     restart: unless-stopped
     ports:
       - "80:80"

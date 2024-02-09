@@ -227,7 +227,7 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     sudo apt-get update
 
 #### 1.2 Install the Docker packages.
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
+    sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-compose
 
 
 ### 2. Docker and Docker Compose setup
