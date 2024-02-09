@@ -238,6 +238,10 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 
 
 ### 3. To copy .env file to remote server and update EC2 IP address
+#### 3.1 .env file
+    To add EC2 IP address to the ALLOWED_HOSTS variable in .env
+    To copy .env content over to the remote server
     sudo nano .env
-    sudo nano nginx.conf
+
+#### 3.2 boost up the docker containers
     sudo docker-compose -f docker-compose.prod.yml up
