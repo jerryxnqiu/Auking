@@ -245,3 +245,20 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 
 #### 3.2 boost up the docker containers
     sudo docker-compose -f docker-compose.prod.yml up
+
+#### 3.3 To load mysql database from pre-filled tables
+    mysql -u auking -p auking < ./mysqlInitializationScripts/001_dbProductLogisticsAuExpress_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/002_dbProductLogisticsEWE_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/003_dbProductAddOnService_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/004_dbProductCategory_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/005_dbProductFromScrapy_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/006_dbProductSubCategory_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/007_dbProductSPU_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/008_dbProductSKU_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/009_dbProductImage_dump.sql
+
+#### 3.4 To establish search index and index page display
+    To login djangoContainer
+    
+    python manage.py rebuild_index
+    python manage.py updateIndexCategoryProductBanner
