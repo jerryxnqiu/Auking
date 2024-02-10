@@ -123,6 +123,9 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     command: certonly --webroot -w /var/www/certbot --force-renewal --email jerry_qiu@hotmail.com -d auking.com.au --agree-tos
+    depends_on:
+      - web
+      - nginx
 
 # Define a named volume for MySQL data storage
 volumes:
