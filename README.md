@@ -247,6 +247,8 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     sudo docker-compose -f docker-compose.prod.yml up
 
 #### 3.3 To load mysql database from pre-filled tables
+    To login MySQL container: sudo docker exec -it <container ID> /bin/bash
+
     mysql -u auking -p auking < ./mysqlInitializationScripts/001_dbProductLogisticsAuExpress_dump.sql
     mysql -u auking -p auking < ./mysqlInitializationScripts/002_dbProductLogisticsEWE_dump.sql
     mysql -u auking -p auking < ./mysqlInitializationScripts/003_dbProductAddOnService_dump.sql
@@ -258,7 +260,35 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     mysql -u auking -p auking < ./mysqlInitializationScripts/009_dbProductImage_dump.sql
 
 #### 3.4 To establish search index and index page display
-    To login djangoContainer
-    
+    To login djangoContainer: sudo docker exec -it <container ID> /bin/bash
+
     python manage.py rebuild_index
     python manage.py updateIndexCategoryProductBanner
+
+### 4. To configure HTTPS
+#### 4.1 Use below nginx.conf to start the certificate request
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        server_tokens off;
+        charset utf-8;
+
+        # always redirect to https
+        server {
+            listen 80;
+
+            server_name auking.com.au;
+
+            location / {
+                proxy_pass http://web:8000/;
+            }
+
+            location ~ /.well-known/acme-challenge/ {
+                root /var/www/certbot;
+            }
+        }
+    }
+
+#### 4.2 And then stop containers and use full nginx.conf to restart all containers
