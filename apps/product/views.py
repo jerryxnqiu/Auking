@@ -137,9 +137,13 @@ class DetailView(View):
             # LTRIM key start stopzaaz
             conn.ltrim(historyKey, 0, 4)
 
+        skuDescription = sku.description.replace('&lt;', '<').replace('&gt;', '>')
+        skuDescription = skuDescription.replace('&amp;', '&')
+
         context = {
             'categories': categories,
             'sku': sku,
+            'skuDescription': skuDescription,
             'addOnServices': addOnServices,
             'newSkus': newSkus,
             'sameSpuSkus': sameSpuSkus,

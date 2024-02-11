@@ -243,28 +243,6 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     To copy .env content over to the remote server
     sudo nano .env
 
-#### 3.2 boost up the docker containers
-    sudo docker-compose -f docker-compose.prod.yml up
-
-#### 3.3 To load mysql database from pre-filled tables
-    To login MySQL container: sudo docker exec -it <container ID> /bin/bash
-
-    mysql -u auking -p auking < ./mysqlInitializationScripts/001_dbProductLogisticsAuExpress_dump.sql
-    mysql -u auking -p auking < ./mysqlInitializationScripts/002_dbProductLogisticsEWE_dump.sql
-    mysql -u auking -p auking < ./mysqlInitializationScripts/003_dbProductAddOnService_dump.sql
-    mysql -u auking -p auking < ./mysqlInitializationScripts/004_dbProductCategory_dump.sql
-    mysql -u auking -p auking < ./mysqlInitializationScripts/005_dbProductFromScrapy_dump.sql
-    mysql -u auking -p auking < ./mysqlInitializationScripts/006_dbProductSubCategory_dump.sql
-    mysql -u auking -p auking < ./mysqlInitializationScripts/007_dbProductSPU_dump.sql
-    mysql -u auking -p auking < ./mysqlInitializationScripts/008_dbProductSKU_dump.sql
-    mysql -u auking -p auking < ./mysqlInitializationScripts/009_dbProductImage_dump.sql
-
-#### 3.4 To establish search index and index page display
-    To login djangoContainer: sudo docker exec -it <container ID> /bin/bash
-
-    python manage.py rebuild_index
-    python manage.py updateIndexCategoryProductBanner
-
 ### 4. To configure HTTPS
 #### 4.1 Use below nginx.conf to start the certificate request
     events {
@@ -291,8 +269,39 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
         }
     }
 
-#### 4.2 And then stop containers and use full nginx.conf to restart all containers
-    To rebuild the image
+    sudo docker-compose -f docker-compose.prod.yml up
+
+#### 4.2 Stop containers and update nginx.conf to the full version
+    ^C
+    sudo docker-compose -f docker-compose.prod.yml down
+
+#### 4.3 To remove the Ngxin image
+    To rebuild the Ngxin image
     
     sudo docker image ls
-    sudo docker image rmi django:aukingDjango
+    sudo docker image rmi nginx:alpine
+
+#### 4.4 To restart all containers
+    sudo docker-compose -f docker-compose.prod.yml up
+
+### 5 To load mysql tables and to establish search index and index page display
+#### 5.1 To load mysql database from pre-filled tables
+    To login MySQL container: sudo docker exec -it <container ID> /bin/bash
+
+    mysql -u auking -p auking < ./mysqlInitializationScripts/001_dbProductLogisticsAuExpress_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/002_dbProductLogisticsEWE_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/003_dbProductAddOnService_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/004_dbProductCategory_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/005_dbProductFromScrapy_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/006_dbProductSubCategory_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/007_dbProductSPU_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/008_dbProductSKU_dump.sql
+    mysql -u auking -p auking < ./mysqlInitializationScripts/009_dbProductImage_dump.sql
+
+#### 5.2 To establish search index and index page display
+    To login djangoContainer: sudo docker exec -it <container ID> /bin/bash
+
+    python manage.py rebuild_index
+    python manage.py updateIndexCategoryProductBanner
+
+
