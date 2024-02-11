@@ -292,3 +292,7 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     }
 
 #### 4.2 And then stop containers and use full nginx.conf to restart all containers
+    To rebuild the image
+    
+    sudo docker image ls
+    sudo docker image rmi django:aukingDjango

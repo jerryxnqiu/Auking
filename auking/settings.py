@@ -58,7 +58,7 @@ DJANGO_SUPERUSER = {
 # # Cross-site request forgery (CSRF) protection
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS").split(" ")
 
 # # Django-defender configuraiton
 # DEFENDER_LOGIN_FAILURE_LIMIT = 3
