@@ -273,16 +273,9 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 
 #### 4.2 Stop containers and update nginx.conf to the full version
     ^C
-    sudo docker-compose -f docker-compose.prod.yml down
-
-#### 4.3 To remove the Ngxin image
-    To rebuild the Ngxin image
-    
-    sudo docker image ls
-    sudo docker image rmi nginx:alpine
-
-#### 4.4 To restart all containers
+    Upadte nginx.conf to the full version
     sudo docker-compose -f docker-compose.prod.yml up
+
 
 ### 5 To load mysql tables and to establish search index and index page display
 #### 5.1 To load mysql database from pre-filled tables
