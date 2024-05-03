@@ -111,12 +111,20 @@
 
 		<!-- Receiver IdImageFront -->
 		<div class="col-2 receiverIdImage" style="font-size:small; text-align: center; word-wrap: break-word;">
-			<a href="{{ receiverAddressDefault.receiverIdImageFront.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+            {% if receiverAddressDefault.receiverIdImageFront != "请上传身份证正面图片" %}
+            <a href="{{ receiverAddressDefault.receiverIdImageFront.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+			{% else %}
+			{{ receiverAddressDefault.receiverIdImageFront }}
+			{% endif %}
 		</div>
 
 		<!-- Receiver IdImageBack -->
 		<div class="col-2 receiverIdImage" style="font-size:small; text-align: center; word-wrap: break-word;">
-			<a href="{{ receiverAddressDefault.receiverIdImageBack.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+            {% if receiverAddressDefault.receiverIdImageBack != "请上传身份证背面图片" %}
+            <a href="{{ receiverAddressDefault.receiverIdImageBack.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+			{% else %}
+			{{ receiverAddressDefault.receiverIdImageBack }}
+			{% endif %}
 		</div>
 
 	</div>
@@ -144,14 +152,15 @@
 <div class="container border d-flex align-items-center" style="padding-top: 20px; padding-bottom: 20px;">
 
 	<input type="radio" name="payStyle" value="1" checked>
-	<img class="img-fluid" alt="WechatPAY/aliPAY" style="height: 60px; padding-right: 30px;" src="{% static 'images/aliPayandWeChatPay.jpeg' %}">
-	
-	
+	<img class="img-fluid" alt="WechatPAY" style="height: 60px; padding-right: 30px;" src="{% static 'images/weChatPay.jpg' %}">
+
 	<input type="radio" name="payStyle" value="2">
+	<img class="img-fluid" alt="AliPAY" style="height: 60px; padding-right: 30px;" src="{% static 'images/aliPay.png' %}">
+	
+	<input type="radio" name="payStyle" value="3">
 	<img class="img-fluid" alt="VISA/Master" style="height: 60px; padding-right: 30px;" src="{% static 'images/visaMasterPay.png' %}">
 
-
-	<input type="radio" name="payStyle" value="3">
+	<input type="radio" name="payStyle" value="4">
 	<span style="font-size: 32px; font-weight: bold; margin-left: 10px;">银行转账</span>
 
 </div>
@@ -206,7 +215,7 @@
 				<div class="col-3 d-flex justify-content-center align-items-center" style="height: 100%; background-color:gray; color: white;">
 					<div>{{ parcelPackagingContent.productCountInParcelList }} 件 (约 {{ parcelPackagingContent.parcelWeight }} kg)</div>
 					
-					<div>运费: {{ parcelPackagingContent.parcelPostage }}</div>
+					<div>运费: ${{ parcelPackagingContent.parcelPostage }} (~￥{{ parcelPackagingContent.parcelPostageCN }})</div>
 				</div>
 
 			</div>
@@ -227,17 +236,34 @@
 						</span>
 						件商品，总金额
 						<span style="color: red; font-weight: bolder; font-size: 24px;">
-							<b>{{ totalSkuPriceAuExpress }}元</b>
+							<b>${{ totalSkuPriceAuExpress }}AUD</b>
+							<b>(~￥{{ totalSkuPriceAuExpressCN }}元)</b>
 						</span>
 					</div>
-					<div class="transit" style="text-align: right;">运费：
+					<div class="" style="text-align: right;">共
 						<span style="color: red; font-weight: bolder; font-size: 24px;">
-							<b>{{ totalPostageAuExpress }}元</b>
+							<em>{{ totalServiceQty }}</em>
+						</span>
+						件贴心服务，总金额
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>${{ totalServicePrice }}AUD</b>
+							<b>(~￥{{ totalServicePriceCN }}元)</b>
+						</span>
+					</div>
+					<div class="" style="text-align: right;">共重
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<em>{{ totalLogisticsWeight }}</em>
+						</span>
+						Kg，总运费
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>${{ totalPostageAuExpress }}AUD</b>
+							<b>(~￥{{ totalPostageAuExpressCN }}元)</b>
 						</span>
 					</div>
 					<div class="total_pay" style="text-align: right;">实付款：
 						<span style="color: red; font-weight: bolder; font-size: 24px;">
-							<b>{{ totalPayAuExpress }}元</b>
+							<b>${{ totalPayAuExpress }}AUD</b>
+							<b>(~￥{{ totalPayAuExpressCN }}元)</b>
 						</span>
 					</div>
 				</div>
@@ -281,7 +307,7 @@
 				<div class="col-3 d-flex justify-content-center align-items-center" style="height: 100%; background-color:gray; color: white;">
 					<div>{{ parcelPackagingContent.productCountInParcelList }} 件 (约 {{ parcelPackagingContent.parcelWeight }} kg)</div>
 					
-					<div>运费: {{ parcelPackagingContent.parcelPostage }}</div>
+					<div>运费: ${{ parcelPackagingContent.parcelPostage }} (~￥{{ parcelPackagingContent.parcelPostageCN }})</div>
 				</div>
 
 			</div>
@@ -302,17 +328,34 @@
 						</span>
 						件商品，总金额
 						<span style="color: red; font-weight: bolder; font-size: 24px;">
-							<b>{{ totalSkuPriceEWE }}元</b>
+							<b>${{ totalSkuPriceEWE }}AUD</b>
+							<b>(~￥{{ totalSkuPriceEWECN }}元)</b>
 						</span>
 					</div>
-					<div class="transit" style="text-align: right;">运费：
+					<div class="" style="text-align: right;">共
 						<span style="color: red; font-weight: bolder; font-size: 24px;">
-							<b>{{ totalPostageEWE }}元</b>
+							<em>{{ totalServiceQty }}</em>
+						</span>
+						件贴心服务，总金额
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>${{ totalServicePrice }}AUD</b>
+							<b>(~￥{{ totalServicePriceCN }}元)</b>
+						</span>
+					</div>
+					<div class="" style="text-align: right;">共重
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<em>{{ totalLogisticsWeight }}</em>
+						</span>
+						Kg，总运费
+						<span style="color: red; font-weight: bolder; font-size: 24px;">
+							<b>${{ totalPostageEWE }}AUD</b>
+							<b>(~￥{{ totalPostageEWECN }}元)</b>
 						</span>
 					</div>
 					<div class="total_pay" style="text-align: right;">实付款：
 						<span style="color: red; font-weight: bolder; font-size: 24px;">
-							<b>{{ totalPayEWE }}元</b>
+							<b>${{ totalPayEWE }}AUD</b>
+							<b>(~￥{{ totalPayEWECN }}元)</b>
 						</span>
 					</div>
 				</div>

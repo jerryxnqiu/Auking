@@ -3,8 +3,14 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from django.views.generic import View
 from django_redis import get_redis_connection
+from bocfx import bocfx
+import math
+
 from .models import ProductCategory, ProductSubCategory, ProductSKU, ProductSPU, ProductImage, ProductAddOnService,\
                     ProductLogisticsAuExpress, ProductLogisticsEWE, IndexProductBanner, IndexCategoryProductBanner, IndexPromotionBanner
+
+### Global variable for RMB to AUD exchange rate
+audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
 ### import logging
 ### logger = logging.getLogger(__name__)
@@ -42,6 +48,11 @@ class IndexView(View):
             titleBanners = IndexCategoryProductBanner.objects.filter(category=category, displayCategory=0).order_by('index')
             imageBanners = IndexCategoryProductBanner.objects.filter(category=category, displayCategory=1).order_by('index')
 
+            # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+            for imageBanner in imageBanners:
+                imageBanner.sku.price = math.ceil(float(imageBanner.sku.price) / 4.8 * 10) / 10
+                imageBanner.sku.priceCN = math.ceil(float(imageBanner.sku.price) * audExRate * 10) / 10
+
             category.titleBanners = titleBanners
             category.imageBanners = imageBanners
 
@@ -51,10 +62,13 @@ class IndexView(View):
         shoppingCartCount = 0
 
         # To summarize the response
-        context = {'categories': categories,
-                   'cartCount': cartCount,
-                   'productBanners': productBanners,
-                   'promotionBanners': promotionBanners}
+        context = {
+            'audExRate': audExRate,
+            'categories': categories,
+            'cartCount': cartCount,
+            'productBanners': productBanners,
+            'promotionBanners': promotionBanners
+        }
 
         return render(request, 'index.html', context)
 
@@ -70,9 +84,12 @@ class DetailView(View):
         except ProductSKU.DoesNotExist as e:
             return redirect(reverse('product:index'))
 
+        # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+        sku.price = math.ceil(float(sku.price) / 4.8 * 10) / 10
+        sku.priceCN = math.ceil(float(sku.price) * audExRate * 10) / 10
+
         # To get the product category
         categories = ProductCategory.objects.all()
-
 
         # To get the product comments
         # sku_order = OrderGoods.objects.filter(sku=sku).exclude(comment='')
@@ -84,8 +101,13 @@ class DetailView(View):
         # To get the products from the same SPU
         sameSpuSkus = ProductSKU.objects.filter(spu=sku.spu).exclude(id=productId)
 
-        # To get all the service for the product
+        # To get all the service for the product, and convert the price to RMB
         addOnServices = ProductAddOnService.objects.all()
+
+        # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+        for addOnService in addOnServices:
+            addOnService.price = math.ceil(float(addOnService.price) * 10) / 10
+            addOnService.priceCN = math.ceil(float(addOnService.price) * audExRate * 10) / 10
 
         # To get all pictures of the product
         pictures = ProductImage.objects.filter(sku=sku)
@@ -141,6 +163,7 @@ class DetailView(View):
         skuDescription = skuDescription.replace('&amp;', '&')
 
         context = {
+            'audExRate': audExRate,
             'categories': categories,
             'sku': sku,
             'skuDescription': skuDescription,
@@ -164,7 +187,7 @@ class ProductCategoryListView(View):
         categories = ProductCategory.objects.all()
 
         try:
-            category = ProductCategory.objects.get(nameEN=categoryName)
+            category = ProductCategory.objects.get(name=categoryName)
         except ProductCategory.DoesNotExist as e:
             return redirect(reverse('product:index'))
 
@@ -195,6 +218,11 @@ class ProductCategoryListView(View):
         # To get the contents on page "page"
         skusPage = paginator.page(page)
 
+        # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+        for sku in skusPage:
+            sku.price = math.ceil(float(sku.price) / 4.8 * 10) / 10
+            sku.priceCN = math.ceil(float(sku.price) * audExRate * 10) / 10
+
         # To limit the display of page number to "5"
         # 1. If total less than 5, then just display [1 - page number]
         # 2. If current is on page 3，then display [1,2,3,4,5]
@@ -217,6 +245,12 @@ class ProductCategoryListView(View):
         # To get the content through the page object
         # To get the new products
         newSkus = ProductSKU.objects.filter(category=category).order_by('-create_time')[:2]
+        
+        # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+        for sku in newSkus:
+            sku.price = math.ceil(float(sku.price) / 4.8 * 10) / 10
+            sku.priceCN = math.ceil(float(sku.price) * audExRate * 10) / 10
+
 
         # 获取首页购物车的数目
         cartCount = 0
@@ -226,6 +260,7 @@ class ProductCategoryListView(View):
             cartCount = conn.hlen(cartKey)
 
         context = {
+            'audExRate': audExRate,
             "sort": sort,
             'category': category,
             'categories': categories,
@@ -248,7 +283,7 @@ class ProductSubCategoryListView(View):
         subCategories = ProductSubCategory.objects.all()
 
         try:
-            subCategory = ProductSubCategory.objects.get(nameEN=subCategoryName)
+            subCategory = ProductSubCategory.objects.get(name=subCategoryName)
         except ProductSubCategory.DoesNotExist as e:
             return redirect(reverse('product:index'))
 
@@ -280,6 +315,11 @@ class ProductSubCategoryListView(View):
         # To get the contents on page "page"
         skusPage = paginator.page(page)
 
+        # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+        for sku in skusPage:
+            sku.price = math.ceil(float(sku.price) / 4.8 * 10) / 10
+            sku.priceCN = math.ceil(float(sku.price) * audExRate * 10) / 10
+        
         # To limit the display of page number to "5"
         # 1. If total less than 5, then just display [1 - page number]
         # 2. If current is on page 3，then display [1,2,3,4,5]
@@ -302,6 +342,11 @@ class ProductSubCategoryListView(View):
         # To get the content through the page object
         # To get the new products
         newSkus = ProductSKU.objects.filter(subCategory=subCategory).order_by('-create_time')[:2]
+        
+        # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+        for sku in newSkus:
+            sku.price = math.ceil(float(sku.price) / 4.8 * 10) / 10
+            sku.priceCN = math.ceil(float(sku.price) * audExRate * 10) / 10
 
         # 获取首页购物车的数目
         cartCount = 0
@@ -311,6 +356,7 @@ class ProductSubCategoryListView(View):
             cartCount = conn.hlen(cartKey)
 
         context = {
+            'audExRate': audExRate,
             "sort": sort,
             'category': category,
             'subCategory': subCategory,
@@ -323,8 +369,6 @@ class ProductSubCategoryListView(View):
 
         return render(request, 'listSubCategory.html', context)
 
-    pass
-
 
 ### Grid view of products of a spu
 class ProductSPUListView(View):
@@ -336,7 +380,7 @@ class ProductSPUListView(View):
         spus = ProductSPU.objects.all()
 
         try:
-            spu = ProductSPU.objects.get(nameEN=spuName)
+            spu = ProductSPU.objects.get(name=spuName)
         except ProductSPU.DoesNotExist as e:
             return redirect(reverse('product:index'))
 
@@ -368,6 +412,11 @@ class ProductSPUListView(View):
         # To get the contents on page "page"
         skusPage = paginator.page(page)
 
+        # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+        for sku in skusPage:
+            sku.price = math.ceil(float(sku.price) / 4.8 * 10) / 10
+            sku.priceCN = math.ceil(float(sku.price) * audExRate * 10) / 10
+
         # To limit the display of page number to "5"
         # 1. If total less than 5, then just display [1 - page number]
         # 2. If current is on page 3，then display [1,2,3,4,5]
@@ -391,6 +440,11 @@ class ProductSPUListView(View):
         # To get the new products
         newSkus = ProductSKU.objects.filter(spu=spu).order_by('-create_time')[:2]
 
+        # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+        for sku in newSkus:
+            sku.price = math.ceil(float(sku.price) / 4.8 * 10) / 10
+            sku.priceCN = math.ceil(float(sku.price) * audExRate * 10) / 10
+
         # 获取首页购物车的数目
         cartCount = 0
         if request.user.is_authenticated:
@@ -399,6 +453,7 @@ class ProductSPUListView(View):
             cartCount = conn.hlen(cartKey)
 
         context = {
+            'audExRate': audExRate,
             "sort": sort,
             'category': category,
             'spu': spu,
@@ -410,5 +465,3 @@ class ProductSPUListView(View):
         }
 
         return render(request, 'listSPU.html', context)
-
-    pass

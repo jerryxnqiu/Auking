@@ -220,12 +220,21 @@
 
 		<!-- Receiver IdImageFront -->
 		<div class="col-2 receiverIdImage" style="font-size:small; text-align: center; word-wrap: break-word;">
+            {% if orderInfo.receiverAddress.receiverIdImageFront != "请上传身份证正面图片" %}
             <a href="{{ orderInfo.receiverAddress.receiverIdImageFront.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+			{% else %}
+			{{ orderInfo.receiverAddress.receiverIdImageFront }}
+			{% endif %}
 		</div>
 
 		<!-- Receiver IdImageBack -->
 		<div class="col-2 receiverIdImage" style="font-size:small; text-align: center; word-wrap: break-word;">
+            {% if orderInfo.receiverAddress.receiverIdImageBack != "请上传身份证背面图片" %}
             <a href="{{ orderInfo.receiverAddress.receiverIdImageBack.url }}" target="_blank" style="text-decoration: none;">看图片</a>
+			{% else %}
+			{{ orderInfo.receiverAddress.receiverIdImageBack }}
+			{% endif %}
+            
 		</div>
 
 	</div>

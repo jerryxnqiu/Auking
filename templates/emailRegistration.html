@@ -12,34 +12,26 @@
 </head>
 <body>
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3 text-center">
-            <!-- Centered Text -->
-            <img src="{{ aukingLogoImageURL }}" alt="aukingLogo" class="img-fluid">
+    <div class="container" style="display: flex; align-items: center;">
+        <div class="row">
+            <div class="col-md-6 offset-md-3" style="text-align: left;">
+                <!-- Centered Text -->
+                <img src="{{ aukingLogoImageURL }}" alt="aukingLogo" class="img-fluid" style="max-height: 100px; width: auto;">
+            </div>
         </div>
     </div>
-</div>
-<div class="container">
-    <p style="font-size: 24px; padding: 20px 20px 0px 20px;">您好，{{ username }}</p>
-    
-    <p style="font-size: 18px; padding: 20px 20px 0px 20px;">欢迎您成为爱优品礼品店注册会员。</p>
+    <div class="container">
+        <p style="font-size: 24px; padding: 20px 20px 0px 20px;">您好，{{ username }}</p>
+        
+        <p style="font-size: 18px; padding: 20px 20px 0px 20px;">欢迎您成为爱优品礼品店注册会员。</p>
 
-    <p style="font-size: 18px; padding: 20px 20px 0px 20px;">请点击下面链接激活您的账户</p>
-    
-    <p style="font-size: 18px; padding: 20px 20px 0px 20px;"><a href="{{ protocol }}://{{ domain }}{% url 'user:activate' token=token %}">{{ protocol }}://{{ domain }}{% url 'user:activate' token=token %}</a></p>
+        <p style="font-size: 18px; padding: 20px 20px 0px 20px;">请点击下面链接激活您的账户</p>
+        
+        <p style="font-size: 18px; padding: 20px 20px 0px 20px;"><a href="{{ protocol }}://{{ domain }}{% url 'user:activate' token=token %}">{{ protocol }}://{{ domain }}{% url 'user:activate' token=token %}</a></p>
 
-    <p style="font-size: 18px; padding: 20px 20px 0px 20px; float: right;">爱优品礼品店</p>
+        <p style="font-size: 18px; padding: 20px 20px 0px 20px; float: right;">爱优品礼品店</p>
 
-</div>
-
-
-
-
-
-
-
-
+    </div>
 
 </body>
 </html>

@@ -310,8 +310,8 @@ class ProductFromScrapyAdmin(admin.ModelAdmin):
 
 
 class ProductCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "nameEN", "logo", "image", "detail")
-    search_fields = ("name", "nameEN")
+    list_display = ("name", "nameCN", "logo", "image", "detail")
+    search_fields = ("name", "nameCN")
 
     def get_urls(self):
 
@@ -337,7 +337,7 @@ class ProductCategoryAdmin(admin.ModelAdmin):
                 fields = x.split(",")
                 created = ProductCategory.objects.update_or_create(
                     name = fields[0],
-                    nameEN = fields[1],
+                    nameCN = fields[1],
                     logo = fields[2],
                     image = fields[3],
                     detail = fields[4],
@@ -369,9 +369,9 @@ class ProductCategoryAdmin(admin.ModelAdmin):
 
 
 class ProductSubCategoryAdmin(admin.ModelAdmin):
-    list_display = ("category", "name", "nameEN", "detail")
-    list_filter = ("category__name", "name", "nameEN")
-    search_fields = ("category__name", "name", "nameEN", "detail")
+    list_display = ("category", "name", "nameCN", "detail")
+    list_filter = ("category__name", "name", "nameCN")
+    search_fields = ("category__name", "name", "nameCN", "detail")
 
     def get_urls(self):
 
@@ -398,7 +398,7 @@ class ProductSubCategoryAdmin(admin.ModelAdmin):
                 created = ProductSubCategory.objects.update_or_create(
                     category = ProductCategory.objects.get(name=fields[0]),
                     name = fields[1],
-                    nameEN = fields[2],
+                    nameCN = fields[2],
                     detail = fields[3],
                     )
             url = reverse('admin:index')
@@ -428,9 +428,9 @@ class ProductSubCategoryAdmin(admin.ModelAdmin):
 
 
 class ProductSPUAdmin(admin.ModelAdmin):
-    list_display = ("category", "subCategory", "name", "nameEN", "detail")
-    list_filter = ("category__name", "subCategory__name", "name", "nameEN")
-    search_fields = ("category__name", "subCategory__name", "name", "nameEN", "detail")
+    list_display = ("category", "subCategory", "name", "nameCN", "detail")
+    list_filter = ("category__name", "subCategory__name", "name", "nameCN")
+    search_fields = ("category__name", "subCategory__name", "name", "nameCN", "detail")
 
     def get_urls(self):
 
@@ -458,7 +458,7 @@ class ProductSPUAdmin(admin.ModelAdmin):
                     category = ProductCategory.objects.get(name=fields[0]),
                     subCategory = ProductSubCategory.objects.get(name=fields[1]),
                     name = fields[2],
-                    nameEN = fields[3],
+                    nameCN = fields[3],
                     detail = fields[4],
                     )
             url = reverse('admin:index')
@@ -488,11 +488,11 @@ class ProductSPUAdmin(admin.ModelAdmin):
 
 
 class ProductSKUAdmin(admin.ModelAdmin):
-    list_display = ("category", "subCategory", "spu", "sourceNameAndId", "name", "nameEN", "brand", "description", "cost", "price", "gst", \
+    list_display = ("category", "subCategory", "spu", "sourceNameAndId", "name", "nameCN", "brand", "description", "cost", "price", "gst", \
                     "unit", "image", "weight", "stock", "sales", "logisticsCategoryAuExpress", "logisticsCategoryEWE", "onsales", "status")
     list_filter = ("category__name", "subCategory__name", "spu__name", "brand", "cost", "price", \
                    "unit", "weight", "stock", "logisticsCategoryAuExpress", "logisticsCategoryEWE", "onsales", "sales")
-    search_fields = ("sourceNameAndId", "name", "nameEN", "brand", "description")
+    search_fields = ("sourceNameAndId", "name", "nameCN", "brand", "description")
 
     def get_urls(self):
 
@@ -524,7 +524,7 @@ class ProductSKUAdmin(admin.ModelAdmin):
 
                         sourceNameAndId = fields[3],
                         name = fields[4],
-                        nameEN = fields[5],
+                        nameCN = fields[5],
 
                         brand = fields[6],
                         description = fields[7],

@@ -15,6 +15,8 @@ from django.contrib import messages
 from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
 from itsdangerous import SignatureExpired
 import re
+from bocfx import bocfx
+import math
 
 from user.models import User, SenderAddress, ReceiverAddress
 from product.models import ProductCategory, ProductSKU
@@ -24,6 +26,8 @@ from celery_tasks.tasks import sendRegisterActivateEmail, sendReactivateEmail
 from captcha.fields import ReCaptchaField
 from captcha.widgets import ReCaptchaV2Checkbox
 
+### Global variable for RMB to AUD exchange rate
+audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
 # Create your views here.
 ### To perform registration
@@ -35,7 +39,7 @@ class RegisterView(View):
         # To get the product category
         categories = ProductCategory.objects.all()
 
-        return render(request, 'register.html', {'categories': categories})
+        return render(request, 'register.html', {'audExRate': audExRate, 'categories': categories})
     
     def post(self, request):
 
@@ -51,17 +55,17 @@ class RegisterView(View):
         # To check if data are all provided
         if not all([username, password, email]): # exclude "agreement" in case user might skip this one
             
-            return render(request, 'register.html', {'errmsg': '数据不完整'})
+            return render(request, 'register.html', {'audExRate': audExRate, 'errmsg': '数据不完整'})
 
         # To check if email has correct format
         if not re.match(r'^[a-z0-9][\w.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
             
-            return render(request, 'register.html', {'errmsg': '邮箱格式不正确'})
+            return render(request, 'register.html', {'audExRate': audExRate, 'errmsg': '邮箱格式不正确'})
 
         # To check if statement is agreed
         if agreement != 'on':
             
-            return render(request, 'register.html', {'errmsg': '请同意协议'})
+            return render(request, 'register.html', {'audExRate': audExRate, 'errmsg': '请同意协议'})
 
         # To check if email is used, email is the unique one
         try:
@@ -71,7 +75,7 @@ class RegisterView(View):
             user = None
 
         if user:
-            return render(request, 'register.html', {'errmag': '邮箱已使用，请选择新注册邮箱'})
+            return render(request, 'register.html', {'audExRate': audExRate, 'errmsg': '邮箱已使用，请选择新注册邮箱'})
 
 
         ### 3. Processing the data ################################################################
@@ -133,7 +137,7 @@ class ActivationLinkExpiresView(View):
 
     def get(self, request):
 
-        return render(request, 'activationLinkExpires.html')
+        return render(request, 'activationLinkExpires.html', {'audExRate': audExRate})
 
 
 ### To login the user space, to check if username needs to be memorized by cookies (cookies use Redis)
@@ -156,6 +160,7 @@ class LoginView(View):
 
 
         content = {
+            'audExRate': audExRate,
             'username':username,
             'checked':checked,
             'categories': categories,
@@ -175,7 +180,7 @@ class LoginView(View):
 
         ### 2. Checking data ######################################################################
         if not all([username, password]):
-            return render(request, 'login.html', {'errmsg': '请输入密码'})
+            return render(request, 'login.html', {'audExRate': audExRate, 'errmsg': '请输入密码'})
     
         # Using Django internal function to authenticate user information
         user = authenticate(username=username, password=password)
@@ -206,11 +211,11 @@ class LoginView(View):
 
             else:
                 # The password is valid, but the account is not activated
-                return render(request, 'login.html', {'errmsg': '请激活账户'})
+                return render(request, 'login.html', {'audExRate': audExRate, 'errmsg': '请激活账户'})
         
         else:
             # No backend authenticated the credentials
-            return render(request, 'login.html', {'errmsg': '用户名或者密码错误'})
+            return render(request, 'login.html', {'audExRate': audExRate, 'errmsg': '用户名或者密码错误'})
 
 
 ### To logout the user space
@@ -234,7 +239,7 @@ class PasswordResetView(View):
         # To get the product category
         categories = ProductCategory.objects.all()
 
-        return render(request, 'passwordReset.html', {'categories': categories})
+        return render(request, 'passwordReset.html', {'audExRate': audExRate, 'categories': categories})
 
     def post(self, request):
 
@@ -245,13 +250,13 @@ class PasswordResetView(View):
         ### 2. Checking data ######################################################################
         # To check if email has correct format
         if not re.match(r'^[a-z0-9][\w.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
-            return render(request, 'passwordReset.html', {'errmsg': '邮箱格式不正确'})
+            return render(request, 'passwordReset.html', {'audExRate': audExRate, 'errmsg': '邮箱格式不正确'})
 
         # To check if email is used
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return render(request, 'register.html', {'errmsg': '邮箱并没有注册，请重新注册'})
+            return render(request, 'register.html', {'audExRate': audExRate, 'errmsg': '邮箱并没有注册，请重新注册'})
 
 
         ### 3. Processing the data ################################################################
@@ -295,7 +300,7 @@ class PasswordResetConfirmView(View):
             if user is not None and PasswordResetTokenGenerator().check_token(user, reactivationToken):
                 
                 form = SetPasswordForm(user)
-                return render(request, 'passwordResetConfirm.html', {'form': form})
+                return render(request, 'passwordResetConfirm.html', {'audExRate': audExRate, 'form': form})
 
             else:
 
@@ -362,7 +367,7 @@ class PasswordResetLinkExpiresView(View):
 
     def get(self, request):
 
-        return render(request, 'passwordResetLinkExpires.html')
+        return render(request, 'passwordResetLinkExpires.html', {'audExRate': audExRate})
 
 
 ### To display the password reset success message and setup redirection to "login" page
@@ -370,7 +375,7 @@ class PasswordResetSuccessView(View):
 
     def get(self, request):
 
-        return render(request, 'passwordResetSuccess.html')
+        return render(request, 'passwordResetSuccess.html', {'audExRate': audExRate})
 
 
 ### To display the password reset fail message and setup redirection to "register" page
@@ -378,7 +383,7 @@ class PasswordResetFailView(View):
 
     def get(self, request):
 
-        return render(request, 'passwordResetFail.html')
+        return render(request, 'passwordResetFail.html', {'audExRate': audExRate})
 
 
 ### To show "user information" and recent browsing history View
@@ -412,6 +417,7 @@ class UserInfoView(LoginRequiredMixin, View):
 
         # To summarize the return message
         context = {
+            'audExRate': audExRate,
             'categories': categories,
             'page': 'user',
             'senderAddress': senderAddress,
@@ -465,6 +471,26 @@ class UserOrderView(LoginRequiredMixin, View):
         # To get the contents on page "page"
         ordersPage = paginator.page(page)
 
+        for order in ordersPage:
+            for sku in order.orderSkus:
+                sku.skuPrice = math.ceil(float(sku.skuPrice) * 10) / 10
+                sku.skuPriceCN = math.ceil(float(sku.skuPrice) * audExRate * 10) / 10
+
+            order.totalSkuPrice = math.ceil(float(order.totalSkuPrice) * 10) / 10
+            order.totalSkuPriceCN = math.ceil(float(order.totalSkuPrice) * audExRate * 10) / 10
+
+            order.totalServicePrice = math.ceil(float(order.totalServicePrice) * 10) / 10
+            order.totalServicePriceCN = math.ceil(float(order.totalServicePrice) * audExRate * 10) / 10
+
+            order.totalLogisticsPrice = math.ceil(float(order.totalLogisticsPrice) * 10) / 10
+            order.totalLogisticsPriceCN = math.ceil(float(order.totalLogisticsPrice) * audExRate * 10) / 10
+
+            order.totalHandlingFee = math.ceil(float(order.totalHandlingFee) * 10) / 10
+            order.totalHandlingFeeCN = math.ceil(float(order.totalHandlingFee) * audExRate * 10) / 10
+
+            order.totalPrice = math.ceil(float(order.totalPrice) * 10) / 10
+            order.totalPriceCN = math.ceil(float(order.totalPrice) * audExRate * 10) / 10
+
         # To limit the display of page number to "5"
         # 1. If total less than 5, then just display [1 - page number]
         # 2. If current is on page 3，then display [1,2,3,4,5]
@@ -487,7 +513,13 @@ class UserOrderView(LoginRequiredMixin, View):
             
 
         context = {
+            'audExRate': audExRate,
             'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
+            'SUPAY_REDIRECT_DOMAIN': settings.SUPAY_REDIRECT_DOMAIN,
+            'WECHATPAY_URL': settings.WECHATPAY_URL,
+            'ALIPAY_URL': settings.ALIPAY_URL,
+            'MERCHANT_ID': settings.MERCHANT_ID,
+            'AUTHENTICATION_CODE': settings.AUTHENTICATION_CODE,
             'ordersPage': ordersPage,
             'page': 'order',
             'pages': pages,
@@ -512,6 +544,7 @@ class SenderAddressView(LoginRequiredMixin, View):
 
         # To summarize the response 
         context = {
+            'audExRate': audExRate,
             'categories': categories,
             'page': 'senderAddress', 
             'senderAddresses': senderAddresses
@@ -557,6 +590,7 @@ class SenderAddressView(LoginRequiredMixin, View):
             if not all([sender, senderAddr, senderTel]):
                 # To construct the response 
                 context = {
+                    'audExRate': audExRate,
                     'categories': categories,
                     'page': 'senderAddress', 
                     'senderAddresses': senderAddresses,
@@ -565,9 +599,10 @@ class SenderAddressView(LoginRequiredMixin, View):
 
                 return render(request, 'userCenterSenderAddress.html', context)
             
-            if not re.match(r'^1[3|4|5|7|8][0-9]{9}$', senderTel):
+            if not re.match(r'^(?:04\d{8}|1[3-9]\d{9})$', senderTel):
                 # To construct the response 
                 context = {
+                    'audExRate': audExRate,
                     'categories': categories,
                     'page': 'senderAddress', 
                     'senderAddresses': senderAddresses,
@@ -621,6 +656,7 @@ class ReceiverAddressView(LoginRequiredMixin, View):
 
         # To summarize the response 
         context = {
+            'audExRate': audExRate,
             'categories': categories,
             'page': 'receiverAddress', 
             'receiverAddresses': receiverAddresses
@@ -665,28 +701,17 @@ class ReceiverAddressView(LoginRequiredMixin, View):
             try:
                 receiverIdImageFront = request.FILES['receiverIdImageFront']
             except:
-                context = {
-                    'categories': categories,
-                    'page': 'receiverAddress', 
-                    'receiverAddresses': receiverAddresses,
-                    'errmsg': '请上传身份证正面图片'
-                    }
-                return render(request, 'userCenterReceiverAddress.html', context)
+                receiverIdImageFront = '请上传身份证正面图片'
 
             try:
                 receiverIdImageBack = request.FILES['receiverIdImageBack']
             except:
-                context = {
-                    'categories': categories,
-                    'page': 'receiverAddress', 
-                    'receiverAddresses': receiverAddresses,
-                    'errmsg': '请上传身份证背面图片'
-                    }
-                return render(request, 'userCenterReceiverAddress.html', context)
+                receiverIdImageBack = '请上传身份证背面图片'
 
             ### 2. Checking data ######################################################################
             if not all([receiver, receiverAddr, receiverTel]):
                 context = {
+                    'audExRate': audExRate,
                     'categories': categories,
                     'page': 'receiverAddress', 
                     'receiverAddresses': receiverAddresses,
@@ -694,8 +719,9 @@ class ReceiverAddressView(LoginRequiredMixin, View):
                     }
                 return render(request, 'userCenterReceiverAddress.html', context)
             
-            if not re.match(r'^1[3|4|5|7|8][0-9]{9}$', receiverTel):
+            if not re.match(r'^1[3-9]\d{9}$', receiverTel):
                 context = {
+                    'audExRate': audExRate,
                     'categories': categories,
                     'page': 'receiverAddress', 
                     'receiverAddresses': receiverAddresses,

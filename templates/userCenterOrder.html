@@ -25,7 +25,7 @@
 				</div>
 				<div class="col-1 orderHeader d-flex justify-content-center align-items-center">
 					{% csrf_token %}
-					<input class="btn toPayment" orderStatus="{{ order.orderStatus }}" orderId="{{ order.orderId }}" paymentMethod="{{ order.paymentMethod }}" type="submit" style="padding: 0% 10%; margin: 0px;" name="toPayment" value="去付款">
+					<input class="btn toPayment" orderCreateTime="{{ order.create_time }}" orderStatus="{{ order.orderStatus }}" orderId="{{ order.orderId }}" paymentMethod="{{ order.paymentMethod }}" orderTotalPrice="{{ order.totalPrice }}" type="submit" style="padding: 0% 10%; margin: 0px;" name="toPayment" value="去付款">
 				</div>
 			</div>
 		</div>
@@ -58,14 +58,14 @@
 					<div class="container" style="margin: 10px 0px 0px 0px; padding: 0px;">
 						<div class="row">
 							{% for sku in order.orderSkus %}
-							<div class="col-8">
+							<div class="col-7">
 								{{ sku.skuName }}
 							</div>
 							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
 								x {{ sku.skuCount }}
 							</div>
-							<div class="col-2" style="padding: 0px;">
-								${{ sku.skuPrice }}
+							<div class="col-3" style="padding: 0px;">
+								${{ sku.skuPrice }} (~￥{{ sku.skuPriceCN }})
 							</div>
 						{% endfor %}
 						</div>
@@ -76,14 +76,14 @@
 					<!-- Product Cost -->
 					<div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
 						<div class="row">
-							<div class="col-8 d-flex justify-content-end">
+							<div class="col-7 d-flex justify-content-end">
 								商品小计
 							</div>
 							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
 								x {{ order.totalSkuQty }}
 							</div>
-							<div class="col-2" style="padding: 0px;">
-								${{ order.totalSkuPrice }}
+							<div class="col-3" style="padding: 0px;">
+								${{ order.totalSkuPrice }} (~￥{{ order.totalSkuPriceCN }})
 							</div>
 						</div>
 					</div>
@@ -91,14 +91,14 @@
 					<!-- add-on Service Cost -->
 					<div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
 						<div class="row">
-							<div class="col-8 d-flex justify-content-end">
+							<div class="col-7 d-flex justify-content-end">
 								贴心服务
 							</div>
 							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
 								x {{ order.totalServiceQty }}
 							</div>
-							<div class="col-2" style="padding: 0px;">
-								${{ order.totalServicePrice }}
+							<div class="col-3" style="padding: 0px;">
+								${{ order.totalServicePrice }} (~￥{{ order.totalServicePriceCN }})
 							</div>
 						</div>
 					</div>
@@ -106,14 +106,14 @@
 					<!-- Logistics Cost -->
 					<div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
 						<div class="row">
-							<div class="col-8 d-flex justify-content-end align-items-center">
+							<div class="col-7 d-flex justify-content-end align-items-center">
 								运费
 							</div>
 							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
 								{{ order.totalLogisticsWeight }}{{ order.logisticsUnit }}
 							</div>
-							<div class="col-2" style="padding: 0px;">
-								$<em>{{ order.totalLogisticsPrice }}</em>
+							<div class="col-3" style="padding: 0px;">
+								$<em>{{ order.totalLogisticsPrice }}</em> (~￥<em>{{ order.totalLogisticsPriceCN }}</em>)
 							</div>
 						</div>
 					</div>
@@ -121,26 +121,26 @@
 					<!-- Transaction Cost -->
 					<div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
 						<div class="row">
-							<div class="col-8 d-flex justify-content-end align-items-center">
-								{% if order.paymentMethod == 1 %}
+							<div class="col-7 d-flex justify-content-end align-items-center">
+								{% if order.paymentMethod == 1 or order.paymentMethod == 2 %}
 								交易手续费 (不含在总计，支付时额外添加)
-								{% elif order.paymentMethod == 2 %}
+								{% elif order.paymentMethod == 3 %}
 								交易手续费 (含在总计)
 								{% else %}
 								交易手续费
 								{% endif %}
 							</div>
 							<div class="col-2 d-flex justify-content-center align-items-center" style="padding: 0px;">
-								{% if order.paymentMethod == 1 %}
+								{% if order.paymentMethod == 1 or order.paymentMethod == 2 %}
 								1% 
-								{% elif order.paymentMethod == 2 %}
-								3.5% + $0.3
+								{% elif order.paymentMethod == 3 %}
+								~3.5%
 								{% else %}
 								0%
 								{% endif %}
 							</div>
-							<div class="col-2" style="padding: 0px;">
-								$<em>{{ order.totalHandlingFee }}</em>
+							<div class="col-3" style="padding: 0px;">
+								$<em>{{ order.totalHandlingFee }}</em> (~￥<em>{{ order.totalHandlingFeeCN }}</em>)
 							</div>
 						</div>
 					</div>
@@ -153,8 +153,8 @@
 							</div>
 							<div class="col-1">
 							</div>
-							<div class="col-3" style="padding: 0px; font-size: 24px;font-weight: bolder;color: red;">
-								${{ order.totalPrice }}
+							<div class="col-3" style="padding: 0px; font-size: 16px; font-weight: bolder; color: red;">
+								${{ order.totalPrice }} (~￥{{ order.totalPriceCN }})
 							</div>
 						</div>
 					</div>
@@ -240,22 +240,134 @@
 			var csrf = $('input[name="csrfmiddlewaretoken"]').val()
 			var stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
 	
+			var orderCreateTime = $(this).attr('orderCreateTime');
 			var orderStatus = $(this).attr('orderStatus');
 			var orderId = $(this).attr('orderId');
 			var paymentMethod = $(this).attr('paymentMethod');
+			var orderTotalPrice = $(this).attr('orderTotalPrice');
 
 			// To check if order status is "unpaid"
 			if (orderStatus == 1) {
 
-				// To trigger "SuperPay": "https://doc.supaytechnology.com/EN/h5/index.html#api-OnlineH5_Interface-currentRate"
+				// To trigger "SuperPay" WeChatPay: "https://doc.supaytechnology.com/CN/h5/index.html#api-OnlineH5_Interface-useWechat"
 				if (paymentMethod == 1) {
-					console.log(paymentMethod)
+
+					// To construct the token
+					var paramsToken = {
+						merchant_id: '{{ MERCHANT_ID }}',
+						authentication_code: '{{ AUTHENTICATION_CODE }}',
+						merchant_trade_no: orderId,
+						total_amount: '0.01',
+					};
+					var stringToken = new URLSearchParams(paramsToken);
+					var token = md5(stringToken)
+
+
+					// To construct the UTC create time
+					var parsedCreateTime = moment(orderCreateTime, "MMMM DD, YYYY, h:mm a");
+					parsedCreateTime.utc();
+					var formattedCreateTime = parsedCreateTime.format("YYYY-MM-DD HH:mm:ss");
+
+
+					// To construct the full parameters
+					var paramsFull = {
+						merchant_id: '{{ MERCHANT_ID }}',
+						authentication_code: '{{ AUTHENTICATION_CODE }}',
+						product_title: orderId,
+						merchant_trade_no: orderId,
+						currency: 'AUD',
+						total_amount: '0.01',
+						create_time: formattedCreateTime,
+						notification_url: 'https://auking.com.au/order/wechatpaywebhook',
+						token: token,
+						return_url: '{{ SUPAY_REDIRECT_DOMAIN }}' + '/user/order/1',
+					};
+
+					var queryParams = Object.keys(paramsFull).map(function(key) {
+						return encodeURIComponent(key) + '=' + encodeURIComponent(paramsFull[key]);
+					}).join('&');
+
+					var fullUrl = "{{ WECHATPAY_URL }}" + '?' + queryParams;
+
+					fetch(fullUrl)
+					.then(response => {
+                    	if (!response.ok) {
+                        	throw new Error('Network response was not ok');
+                    	}
+                    	return response.json();
+                	})
+                	.then(data => {
+						// To redirect the page to the SuPay payment URL
+						window.location.href = data.supayCashierURL;
+					})
+					.catch(error => {
+						console.error('Error:', error);
+					});
+
 				} 
 				
-				// To trigger "Stripe"
+				// To trigger "SuperPay" AliPay: "https://doc.supaytechnology.com/CN/h5/index.html#api-OnlineH5_Interface-useAlipay"
 				else if (paymentMethod == 2) {
+					
+					// To construct the token
+					var paramsToken = {
+						merchant_id: '{{ MERCHANT_ID }}',
+						authentication_code: '{{ AUTHENTICATION_CODE }}',
+						merchant_trade_no: orderId,
+						total_amount: '0.01',
+					};
+					var stringToken = new URLSearchParams(paramsToken);
+					var token = md5(stringToken)
 
-					console.log(paymentMethod)
+
+					// To construct the UTC create time
+					var parsedCreateTime = moment(orderCreateTime, "MMMM DD, YYYY, h:mm a");
+					parsedCreateTime.utc();
+					var formattedCreateTime = parsedCreateTime.format("YYYY-MM-DD HH:mm:ss");					
+
+
+					// To construct the full parameters
+					var paramsFull = {
+						merchant_id: '{{ MERCHANT_ID }}',
+						authentication_code: '{{ AUTHENTICATION_CODE }}',
+						product_title: orderId,
+						merchant_trade_no: orderId,
+						currency: 'AUD',
+						total_amount: '0.01',
+						create_time: formattedCreateTime,
+						notification_url: 'https://auking.com.au/order/alipaywebhook',
+						token: token,
+						return_url: '{{ SUPAY_REDIRECT_DOMAIN }}' + '/user/order/1',
+					};
+
+					var queryParams = Object.keys(paramsFull).map(function(key) {
+						return encodeURIComponent(key) + '=' + encodeURIComponent(paramsFull[key]);
+					}).join('&');
+
+					var fullUrl = "{{ ALIPAY_URL }}" + '?' + queryParams;
+
+					fetch(fullUrl)
+					.then(response => {
+                    	if (!response.ok) {
+                        	throw new Error('Network response was not ok');
+                    	}
+                    	return response.json();
+                	})
+                	.then(data => {
+						orderId = data.merchant_trade_no
+						paymentResult = data.result
+
+						console.log(data)
+
+					})
+					.catch(error => {
+						console.error('Error:', error);
+					});
+
+				}
+				
+				// To trigger "Stripe"
+				else if (paymentMethod == 3) {
 
 					fetch("/order/createcheckoutsession/" + orderId, {
 						method: "POST",
@@ -276,12 +388,12 @@
 							}
 						})
 					.catch(function (error) {
-							console.error("Error:", error);
-							});
+						console.error("Error:", error);
+						});
 				} 
 				
 				// To redirect to "Bank Transfer" page
-				else if (paymentMethod == 3) {
+				else if (paymentMethod == 4) {
 					
 					setTimeout(function() {
 						window.location.href = "{% url 'order:bankTransferDetailsView' %}";

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎光临爱优品礼品店</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+	<script src="https://kit.fontawesome.com/def8487c66.js" crossorigin="anonymous"></script>
+	<script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+<div class="container" style="display: flex; align-items: center;">
+    <div class="row">
+        <div class="col-md-6 offset-md-3" style="text-align: left;">
+            <img src="{{ aukingLogoImageURL }}" alt="aukingLogo" class="img-fluid" style="max-height: 100px; width: auto;">
+        </div>
+    </div>
+</div>
+
+<div class="container bolder" style="border-style: solid; border-color: lightgrey; border-width: 0.5px; padding: 0px; margin-bottom: 20px;">
+    
+    <!-- To summary information bar -->
+    <div class="container summaryBar">
+        <div class="row" style="padding-left: 10px; background-color: #1f216d; color: white; font-size: large;">
+            NO. {{ order.orderId }}
+        </div>
+        <div class="row" style="padding-left: 10px;">
+            下单时间：{{ order.create_time }}
+        </div>
+    </div>
+
+    <hr style="margin: 0px; border-style: solid; border-color: lightgrey;">
+
+    <!-- To summary information bar -->
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: right;" style="flex-basis: 50%; padding-left: 10px;">
+                支付方式：
+            </div>
+            <div class="col-4 text-align: left;" style="flex-basis: 50%;">
+                {{ paymentMethod }}
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: right;" style="flex-basis: 50%; padding-left: 10px;">
+                支付失败提示符：
+            </div>
+            <div class="col-4 text-align: left;" style="flex-basis: 50%;">
+                {{ responseMessageFull }}
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: right;" style="flex-basis: 50%; padding-left: 10px;">
+                订单状态：
+            </div>
+            <div class="col-4 text-align: left;" style="flex-basis: 50%;">
+                {% if order.orderStatus == 1 %}
+                <span style="color: red; font-weight: bold;">{{ order.statusName }}</span>
+                {% elif order.orderStatus == 2 or order.orderStatus == 3 %}
+                <span style="color: orange; font-weight: bold;">{{ order.statusName }}</span>
+                {% elif order.orderStatus == 4 or order.orderStatus == 5 %}
+                <span style="color: lightgrey; font-weight: bold;">{{ order.statusName }}</span>
+                {% endif %}                        
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: right;" style="flex-basis: 50%; padding-left: 10px;">
+                付款方式：
+            </div>
+            <div class="col-4 text-align: left;" style="flex-basis: 50%;">
+                {{ order.paymentMethodName }}
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: right;" style="flex-basis: 50%; padding-left: 10px;">
+                寄件: 
+            </div>
+            <div class="col-4 text-align: left;" style="flex-basis: 50%;">
+                {{ order.sender }}, {{ order.senderAddr }}, {{ order.senderTel }}
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding: 10px 0px;">
+            <div class="col-8 text-align: right;" style="flex-basis: 50%; padding-left: 10px;">
+                收件: 
+            </div>
+            <div class="col-4 text-align: left;" style="flex-basis: 50%;">
+                {{ order.receiver }}, {{ order.receiverAddr }}, {{ order.receiverTel }}
+            </div>
+        </div>
+    </div>
+
+    <hr style="margin: 0px; border-style: solid; border-color: lightgrey;">
+      
+    <!-- Order Product List -->
+    <div class="container" style="margin: 10px 0px 0px 0px; padding: 0px;">
+        {% for sku in order.orderSkus %}
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: center;" style="flex-basis: 70%; padding-left: 10px;">
+                {{ sku.skuName }}
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                x {{ sku.skuCount }}
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                ￥{{ sku.skuPrice }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <hr style="margin-top: 5px; border-style: solid; border-color: lightgrey;">
+                
+    <!-- Product Cost -->
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: center;" style="flex-basis: 70%; padding-left: 10px;">
+                商品小计
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                x {{ order.totalSkuQty }}
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                ￥{{ order.totalSkuPrice }}
+            </div>
+        </div>
+    </div>
+
+    <!-- add-on Service Cost -->
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: center;" style="flex-basis: 70%; padding-left: 10px;">
+                贴心服务
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                x {{ order.totalServiceQty }}
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                ￥{{ order.totalServicePrice }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Logistics Cost -->
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: center;" style="flex-basis: 70%; padding-left: 10px;">
+                运费
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                {{ order.totalLogisticsWeight }}{{ order.logisticsUnit }}
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                ￥<em>{{ order.totalLogisticsPrice }}</em>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Cost -->
+    <div class="container" style="margin: 5px 0px 0px 0px; padding: 0px;">
+        <div class="row" style="display: flex; padding-top: 10px;">
+            <div class="col-8 text-align: center;" style="flex-basis: 70%; padding-left: 10px;">
+                {% if order.paymentMethod == 1 or order.paymentMethod == 2 %}
+                交易手续费 (不含在总计，支付时额外添加)
+                {% elif order.paymentMethod == 3 %}
+                交易手续费 (含在总计)
+                {% else %}
+                交易手续费
+                {% endif %}
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                {% if order.paymentMethod == 1 or order.paymentMethod == 2 %}
+                1% 
+                {% elif order.paymentMethod == 3 %}
+                ~3.5%
+                {% else %}
+                0%
+                {% endif %}
+            </div>
+            <div class="col-2 text-align: center;" style="flex-basis: 15%;">
+                ￥<em>{{ order.totalHandlingFee }}</em>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total cost -->
+    <div class="container">
+        <div class="row" style="display: flex;">
+            <div class="col-8 text-align: center;" style="flex-basis: 60%;">
+            </div>
+            <div class="col-1 text-align: center;" style="flex-basis: 20%; font-size: 24px; font-weight: bolder;">
+                总计
+            </div>
+            <div class="col-3" style="flex-basis: 20%; font-size: 24px; font-weight: bolder; color: red;">
+                ￥{{ order.totalPrice }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-1 d-flex justify-content-center align-items-center">
+    </div>
+</div>
+
+<div class="container">
+    <p style="font-size: 18px; padding: 20px 20px 0px 20px;">可点击下面链接登录会员中心"我的订单查看详情"</p>
+    
+    <p style="font-size: 18px; padding: 20px 20px 0px 20px;"><a href="http://127.0.0.1:8000/user/order/1">http://127.0.0.1:8000/user/order/1</a></p>
+</div>
+
+</body>
+</html>
+
+
+
+

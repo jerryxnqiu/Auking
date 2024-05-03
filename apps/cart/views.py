@@ -2,9 +2,14 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.http import JsonResponse
 from django_redis import get_redis_connection
+from bocfx import bocfx
+import math
 
 from product.models import ProductCategory, ProductSKU, ProductAddOnService
 from utils.mixin import LoginRequiredMixin
+
+### Global variable for RMB to AUD exchange rate
+audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
 ### Create your views here.
 ### To delete a record in the shopping cart
@@ -173,6 +178,7 @@ class CartInfoView(LoginRequiredMixin, View):
         skus = []
         totalCount = 0
         totalPrice = 0
+        totalPriceCN = 0
 
         for skuIdandAddOnServiceIds, count in cartDict.items():
             
@@ -190,13 +196,17 @@ class CartInfoView(LoginRequiredMixin, View):
                 addOnService = ProductAddOnService.objects.get(id=addOnServicesId)
                 addOnServices.append(addOnService)
 
-            
-            
+            # To update the sku price with live exchange rate, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+            sku.price = math.ceil(float(sku.price) / 4.8 * 10) / 10
+            sku.priceCN = math.ceil(float(sku.price) * audExRate *10) / 10
+
             # To get the product price
             amount = sku.price * int(count)
+            amountCN = sku.priceCN * int(count)
             
             # To add values to "sku" object dynamically
-            sku.amount = amount
+            sku.amount = round(amount, 1)
+            sku.amountCN = round(amountCN, 1)
             sku.count = count
             sku.skuIdandAddOnServiceIds = skuIdandAddOnServiceIds
             sku.addOnServices = addOnServices           # To pass the add-on service name inside each line item
@@ -207,18 +217,23 @@ class CartInfoView(LoginRequiredMixin, View):
 
             totalCount += count
             totalPrice += amount
+            totalPriceCN += amountCN
 
         
         # To get the product category
         categories = ProductCategory.objects.all()
+        totalPrice = math.ceil(totalPrice * 10) / 10
+        totalPriceCN = round(totalPriceCN, 1)
 
 
         # To summarize the response 
         context = {
+            'audExRate': audExRate,
             'categories': categories,
             'skus': skus,
             'totalCount': totalCount,
             'totalPrice': totalPrice,
+            'totalPriceCN': totalPriceCN,
         }
 
         return render(request, 'cart.html', context)

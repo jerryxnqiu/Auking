@@ -28,7 +28,7 @@
     % aws --version
     aws-cli/2.10.0 Python/3.11.2 Darwin/18.7.0 botocore/2.4.5
 
-#### 4. To configure AWS credential to support auto upload of staticfiles
+#### 4. To configure AWS credential in settings.py to support auto upload of staticfiles
     aws configure
     AWS_ACCESS_KEY_ID
     AWS_SECRET_ACCESS_KEY
@@ -44,7 +44,7 @@
     "media/" folder need manual uploading
 ___
 ___
-### Technologies used and Development Environment Setup (MacOS):
+### Local Development Environment Setup and Technologies used (MacOS):
 
 ### 1. Django
 #### 1.1 To setup Django project and Apps

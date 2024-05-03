@@ -12,8 +12,12 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
 	<script src="https://kit.fontawesome.com/def8487c66.js" crossorigin="anonymous"></script>
 	<script src="https://js.stripe.com/v3/"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.18.0/js/md5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
 
 	<link rel="stylesheet" type="text/css" href="{% static 'css/auking.css' %}">
+	<link rel="icon" href="{% static 'images/webBrowserIcon.png' %}">
 	<!--  -->
 	{% block topfiles %}{% endblock topfiles %}
 
@@ -25,11 +29,26 @@
 <nav class="navbar navbar-expand-lg border align-items-center p-1">
 	<div class="container d-flex justify-content-center">
 		<div class="row align-items-center" style="width: 100%;">
-			<div class="col-lg-8 col-md-9">
+			<div class="col-lg-2 col-md-2">
 				<div class="row align-items-center">
 					<div class="col">
 						<a class="navbar-brand" style="font-size: larger; font-weight: bolder;" href="{% url 'product:index' %}">欢迎来到爱优品礼品店</a>
 					</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-3">
+				<div class="row align-items-center">
+					<div class="col" style="display: flex; align-items: center;">
+						<img class="img-fluid" alt="topFlags" src="{% static 'images/topFlags.png' %}" style="max-width: 100px; max-height: 20px; width: auto;">
+						<div style="margin-left: 10px;"> <!-- Adjust margin as needed -->
+							今日参考汇率:
+							<a style="color: red; font-weight: bold;">1 : {{ audExRate }}</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-3">
+				<div class="row align-items-center">
 					<div class="col" style="text-align: right;">
 						<a class="nav-link">欢迎您：<em style="font-weight: bold;">{{ user.username }}</em></a>
 					</div>
@@ -82,7 +101,7 @@
 	<div class="container">
 		<div class="row justify-content-center align-items-center">
 			<div class="col-lg-3 col-md-3 col-sm-3">
-				<a href="index.html">
+				<a href="{% url 'product:index' %}">
 					<img class="img-fluid" alt="aukingLogo" src="{% static 'images/aukingLogo.png' %}">
 				</a>
 			</div>
@@ -129,10 +148,10 @@
 						<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 							{% for category in categories %}
 							<li>
-								{% with categoryNameVar=category.nameEN %}
+								{% with categoryNameVar=category.name %}
 									<a class="dropdown-item justify-content-center" href="{% url 'product:categoryList' categoryName=categoryNameVar page=1 %}">
 										<img alt="" src="{{ category.logo.url }}" style="padding-right: 5px; height: 20px;">
-										{{ category.name }}
+										{{ category.nameCN }}
 									</a>
 								{% endwith %}
 							</li>

@@ -26,6 +26,8 @@ from .views import (
     CheckoutCancelView,
 
     stripeWebhook,
+    weChatPayWebhook,
+    aliPayWebhook,
 
     BankTransferDetailsView,
 )
@@ -46,6 +48,8 @@ urlpatterns = [
     re_path(r'^checkoutcancel$', CheckoutCancelView.as_view(), name='checkoutCancel'),
 
     re_path(r'^stripewebhook', stripeWebhook, name='stripWebhook'),
+    re_path(r'^wechatpaywebhook', weChatPayWebhook, name='weChatPayWebhook'),
+    re_path(r'^alipaywebhook', aliPayWebhook, name='aliPayWebhook'),
 
     re_path(r'^banktransferdetails$', BankTransferDetailsView.as_view(), name='bankTransferDetailsView'),
 

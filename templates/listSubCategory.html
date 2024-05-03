@@ -12,7 +12,7 @@
 		<div class="breadcrumb">
 			<a href="{% url 'product:index' %}" class="link-dark" style="text-decoration: none;">全部分类</a>
 			<span class="ps-1 pe-1">></span>
-			<a href="{% url 'product:categoryList' categoryName=category.nameEN page=1 %}" class="link-dark" style="text-decoration: none;"> {{ category.name }} </a>
+			<a href="{% url 'product:categoryList' categoryName=category.name page=1 %}" class="link-dark" style="text-decoration: none;"> {{ category.name }} </a>
 			<span class="ps-1 pe-1">></span>
 			<span> {{ subCategory.name }} </span>
 			<span class="ps-1 pe-1">></span>
@@ -20,7 +20,7 @@
 		</div>
 	</div>
 	<div class="container">
-		{% with subCategoryNameVar=subCategory.nameEN %}
+		{% with subCategoryNameVar=subCategory.name %}
 		<div class="row">
 			<div class="col-lg-3 col-md-4">
 				<div class="container">
@@ -37,7 +37,8 @@
 						<a href="{% url 'product:detail' sku.id %}" class="link-dark" style="text-decoration: none;">
 							<span class="d-flex justify-content-center" style="margin: 0px 10px;">{{ sku.name }}</span>
 						</a>
-						<div class="prize" style="margin: 0px 10px;">￥{{ sku.price }}</div>
+						<span class="prize" style="margin: 0px 0px 0px 10px; font-weight: bold;">${{ sku.price }}</span>
+						<span class="prize" style="margin: 0px 0px; font-weight: bold; color: grey;">(~¥{{ sku.priceCN }})</span>
 					</div>
 					{% endfor %}
 				</div>
@@ -57,7 +58,8 @@
 									<img src="{{ sku.image.url }}" alt width="100px">
 								</div>
 								<div class="container d-flex justify-content-center align-items-center" style="height: 15px; width: 150px; padding-top: 5px;">
-									<div class="link-dark lh-1" style="font-size: small; font-weight: bold;">¥ {{ sku.price }}</div>
+									<div class="link-dark lh-1" style="font-size: small; font-weight: bold;">${{ sku.price }}</div>
+									<div class="link-dark lh-1" style="font-size: small; color: grey;">(~¥{{ sku.priceCN }})</div>
 									<img src="{% static 'images/shoppingCart.png' %}" style="padding-left: 3px; height: 15px;">
 								</div>
 								<div class="container d-flex justify-content-center align-items-center" style="height: 35px; width: 150px; padding: 5px 0px;">

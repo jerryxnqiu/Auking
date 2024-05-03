@@ -75,6 +75,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(" ")
 INSTALLED_APPS = [
     
     # To add module for Django-admin-interface
+    'corsheaders',
     'admin_interface',
     'colorfield',
 
@@ -108,6 +109,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -275,7 +277,7 @@ EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL")
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND")
 
 
@@ -305,6 +307,16 @@ LOGIN_URL = '/user/login'
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+
+##### To configure the Supay access details
+##### https://doc.supaytechnology.com/CN/h5/index.html#api-OnlineH5_Interface-useWechat
+##### https://doc.supaytechnology.com/CN/h5/index.html#api-OnlineH5_Interface-useAlipay
+SUPAY_REDIRECT_DOMAIN = os.getenv("SUPAY_REDIRECT_DOMAIN")
+WECHATPAY_URL = os.getenv("WECHATPAY_URL")
+ALIPAY_URL = os.getenv("ALIPAY_URL")
+MERCHANT_ID = os.getenv("MERCHANT_ID")
+AUTHENTICATION_CODE = os.getenv("AUTHENTICATION_CODE")
 
 
 ##### To configure Haystack
@@ -342,6 +354,7 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS").split(" ")
 
 ##### To setup logging configuration
 # LOGGING = {

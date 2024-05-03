@@ -1,10 +1,10 @@
-{{ object.nameEN }}
+{{ object.nameCN }}
 {{ object.name }}
-{{ object.category.nameEN }}
+{{ object.category.nameCN }}
 {{ object.category.name }}
-{{ object.subCategory.nameEN }}
+{{ object.subCategory.nameCN }}
 {{ object.subCategory.name }}
-{{ object.spu.nameEN }}
+{{ object.spu.nameCN }}
 {{ object.spu.name }}
 {{ object.brand }}
 {{ object.description }}

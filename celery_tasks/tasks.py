@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.templatetags.static import static
-import json
+import math
 
 #######################################################################################################################
 ### To initialise the Django setting environment for Celery to run 
@@ -29,7 +29,7 @@ def sendRegisterActivateEmail(username, toEmail, token, siteProtocol, siteDomain
     # To send email
     subject = '欢迎您注册爱优品礼品店'
     sender = settings.EMAIL_HOST_USER
-    receiver = [toEmail]
+    receiver = [sender, toEmail]
 
     # To construct the html context
     context = {
@@ -106,12 +106,12 @@ from order.models import OrderInfo, OrderProduct
 
 @app.task
 def sendPaymentSuccessEmail(toEmail, orderId):
-    """To send payment confirmation email"""
+    """To send stripe payment successful confirmation email"""
     
     # Send email
     subject = '欢迎光临爱优品礼品店'
     sender = settings.EMAIL_HOST_USER
-    receiver = [toEmail]
+    receiver = [sender, toEmail]
 
     orderInfo = OrderInfo.objects.get(orderId=orderId)
     orderSkus = OrderProduct.objects.filter(order=orderInfo.orderId)
@@ -126,6 +126,14 @@ def sendPaymentSuccessEmail(toEmail, orderId):
     orderInfo.paymentMethodName = OrderInfo.PAYMENT_METHODS[orderInfo.paymentMethod]
     orderInfo.statusName = OrderInfo.ORDER_STATUS[orderInfo.orderStatus]
     orderInfo.orderSkus = orderSkus
+
+    orderInfo.totalSkuPrice = math.ceil(float(orderInfo.totalSkuPrice) * 10) / 10
+    orderInfo.totalServicePrice = math.ceil(float(orderInfo.totalServicePrice) * 10) / 10
+    orderInfo.totalLogisticsPrice = math.ceil(float(orderInfo.totalLogisticsPrice) * 10) / 10
+    orderInfo.totalHandlingFee = math.ceil(float(orderInfo.totalHandlingFee) * 10) / 10
+    orderInfo.totalPrice = math.ceil(float(orderInfo.totalPrice) * 10) / 10
+
+    
 
     context = {
             'aukingLogoImageURL': static('images/aukingLogo.png'),
@@ -149,6 +157,75 @@ def sendPaymentSuccessEmail(toEmail, orderId):
 
     except Exception as e:
         print(e)
+
+
+@app.task
+def sendWeChatPaynentFailureEmail(toEmail, orderId, responseMessage):
+    """
+    To send WeChat payment failure email
+    1. notificaiton token verfication
+    2. notification validation failure
+    """
+    
+    # Send email
+    subject = '欢迎光临爱优品礼品店'
+    sender = settings.EMAIL_HOST_USER
+    receiver = [sender, toEmail]
+
+    orderInfo = OrderInfo.objects.get(orderId=orderId)
+    orderSkus = OrderProduct.objects.filter(order=orderInfo.orderId)
+
+    for orderSku in orderSkus:
+
+        # To calculate the subtotal of each product (sku)
+        skuAmount = orderSku.skuCount * orderSku.skuPrice
+        orderSku.skuAmount = skuAmount
+
+    # To associate order status and production information to each order
+    orderInfo.paymentMethodName = OrderInfo.PAYMENT_METHODS[orderInfo.paymentMethod]
+    orderInfo.statusName = OrderInfo.ORDER_STATUS[orderInfo.orderStatus]
+    orderInfo.orderSkus = orderSkus
+
+    orderInfo.totalSkuPrice = math.ceil(float(orderInfo.totalSkuPrice) * 10) / 10
+    orderInfo.totalServicePrice = math.ceil(float(orderInfo.totalServicePrice) * 10) / 10
+    orderInfo.totalLogisticsPrice = math.ceil(float(orderInfo.totalLogisticsPrice) * 10) / 10
+    orderInfo.totalHandlingFee = math.ceil(float(orderInfo.totalHandlingFee) * 10) / 10
+    orderInfo.totalPrice = math.ceil(float(orderInfo.totalPrice) * 10) / 10
+
+    if responseMessage == "Notification validation failed":
+        responseMessageFull = '支付时，Notification validation校验失败，返回值是FAILED'
+    else:
+        responseMessageFull = '支付时，Notification validation发送后的response非200'
+
+    context = {
+            'aukingLogoImageURL': static('images/aukingLogo.png'),
+            'order': orderInfo,
+            'paymentMethod': '微信支付 WeChat Pay',
+            'responseMessageFull': responseMessageFull
+        }
+
+    htmlMessage = render_to_string('emailWeChatPaymentFailure.html', context)
+    plainMessage = strip_tags(htmlMessage)
+
+    # To perform the send action
+    try:
+        message = EmailMultiAlternatives(
+            subject=subject,
+            body=plainMessage,
+            from_email=sender,
+            to=receiver
+        )
+
+        message.attach_alternative(htmlMessage, "text/html")
+        message.send()
+
+    except Exception as e:
+        print(e)
+
+
+
+
+
 
 
 

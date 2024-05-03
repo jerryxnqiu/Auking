@@ -14,17 +14,28 @@ from django.conf import settings
 import pandas as pd
 import math
 import hashlib
+from urllib.parse import urlencode, quote
 import json
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
-from celery_tasks.tasks import sendPaymentSuccessEmail
+from celery_tasks.tasks import sendPaymentSuccessEmail, sendWeChatPaynentFailureEmail
+from bocfx import bocfx
+import math
+import os
+from dotenv import load_dotenv
+import requests
+import boto3
 
 from order.models import OrderInfo, OrderProduct, OrderProductandServiceMapping, OrderTracking
-from product.models import ProductCategory, ProductSKU, ProductAddOnService, ProductLogisticsAuExpress, ProductLogisticsEWE, ProductAddOnService
+from product.models import ProductCategory, ProductSKU, ProductAddOnService, ProductLogisticsAuExpress, ProductLogisticsEWE
 from user.models import SenderAddress, ReceiverAddress
+
+
+### Global variable for RMB to AUD exchange rate
+audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
 
 ### Create your views here.
@@ -138,7 +149,8 @@ class OrderPlaceView(LoginRequiredMixin, View):
             temp = parcelTableCurrentStatusParcel[parcelTableCurrentStatusParcel['parcel Id'] == parcelIdkey]
 
             # If any parcel box condition fulfilled, use the parcel box ID for the incumbent product
-            if (temp['sku Price'].astype(float).sum() < skuMaxTotalValueperParcel) & \
+            # sku Price is in RMB, skuMaxTotalValueperParcel is in AUD and exchange rate uses fix rate 4.8
+            if ((temp['sku Price'].astype(float).sum() / 4.8) < skuMaxTotalValueperParcel) & \
                (temp['sku Weight'].astype(float).sum() < skuMaxTotalWeightperParcel) & \
                (temp.shape[0] <= skuMaxTotalQtyperParcel) & \
                ((temp['logistics Category Name Hash'].drop_duplicates().shape[0] > 1) & 
@@ -227,7 +239,7 @@ class OrderPlaceView(LoginRequiredMixin, View):
                 addOnService = ProductAddOnService.objects.get(id=addOnServiceId)
                 addOnServicePrice = addOnService.price
                 addOnServiceGst = addOnService.gst
-                addOnServiceSubtotal = (addOnServicePrice + addOnServiceGst) * skuCount
+                addOnServiceSubtotal = addOnServicePrice * skuCount
 
                 addOnServices.append([addOnServiceId,
                                       addOnService,
@@ -367,8 +379,9 @@ class OrderPlaceView(LoginRequiredMixin, View):
 
         # To calculate key output values
         totalServiceQty = addOnServices["add-On Service Count"].sum()
-        totalServicePrice = addOnServices["add-On Service Subtotal"].sum()
-        totalLogisticsWeight = parcelAuExpress["subtotal Weight"].sum()
+        totalServicePrice = math.ceil(addOnServices["add-On Service Subtotal"].sum() * 10) / 10
+        totalServicePriceCN = math.ceil(float(totalServicePrice) * audExRate * 10) / 10
+        totalLogisticsWeight = math.ceil(parcelAuExpress["subtotal Weight"].sum() * 10) / 10
 
 
         ###########################################################################################
@@ -408,7 +421,9 @@ class OrderPlaceView(LoginRequiredMixin, View):
             
             sku = ProductSKU.objects.get(id=skuId)
             skuName = sku.name
-            skuPrice = sku.price
+
+            # To update the sku price back to AUD, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+            skuPrice = math.ceil(float(sku.price) / 4.8 * 10) / 10
             
             logisticsCategoryName = parcelAuExpress.iloc[indexSku]['logistics Category Name']
             logisticsCategoryNameHash = parcelAuExpress.iloc[indexSku]['logistics Category Name Hash']
@@ -510,7 +525,8 @@ class OrderPlaceView(LoginRequiredMixin, View):
         
         # parcelTableAuExpress.to_csv('parcelTableAuExpress.csv', index=False)
 
-        totalSkuPriceAuExpress = parcelTableAuExpress['sku Price'].astype(float).sum()
+        totalSkuPriceAuExpress = math.ceil(parcelTableAuExpress['sku Price'].astype(float).sum() * 10) / 10
+        totalSkuPriceAuExpressCN = math.ceil(totalSkuPriceAuExpress * audExRate * 10) / 10
 
         # To prepare "parcelId_skuId_serviceId" list
         parcelTableAuExpress["parcelId skuId addOnServiceId"] = parcelTableAuExpress["parcel Id"].astype(str) + "_" + parcelTableAuExpress["sku and Add-On Service ID List"]
@@ -537,7 +553,7 @@ class OrderPlaceView(LoginRequiredMixin, View):
 
             # To get the total quantity and total weight of product in each parcelId
             productCountInParcelList = temp['count In Parcel'].sum()
-            parcelWeight = temp['sku Weight'].astype(float).sum()
+            parcelWeight = math.ceil(temp['sku Weight'].astype(float).sum() * 10) / 10
 
             # parcel weight minimum count is 1Kg
             if parcelWeight < 1:
@@ -545,14 +561,17 @@ class OrderPlaceView(LoginRequiredMixin, View):
             else:
                 parcelPostage = parcelWeight * float(temp.iloc[0]['logistics Price per Unit'])
             
-            # To accumulate the postage
+            # To accumulate the postage in AUD
+            parcelPostage = math.ceil(parcelPostage * 10) / 10
+            parcelPostageCN = math.ceil(parcelPostage * audExRate * 10) / 10
             totalPostageAuExpress += parcelPostage
 
             # To contruct the element of dictionary
             parcelPackagingTableAuExpress[parcelIdAuExpressKey] = {'countInParcelAndSkuNameList': countInParcelAndSkuNameList,
                                                                    'productCountInParcelList': productCountInParcelList,
                                                                    'parcelWeight': parcelWeight,
-                                                                   'parcelPostage': parcelPostage}
+                                                                   'parcelPostage': parcelPostage,
+                                                                   'parcelPostageCN': parcelPostageCN}
 
 
         ###########################################################################################
@@ -586,7 +605,9 @@ class OrderPlaceView(LoginRequiredMixin, View):
             
             sku = ProductSKU.objects.get(id=skuId)
             skuName = sku.name
-            skuPrice = sku.price
+
+            # To update the sku price back to AUD, 4.8 is the initial exchange rate used in Scrapy for database ingestion
+            skuPrice = math.ceil(float(sku.price) / 4.8 * 10) / 10
             
             logisticsCategoryName = parcelEWE.iloc[indexSku]['logistics Category Name']
             logisticsCategoryNameHash = parcelEWE.iloc[indexSku]['logistics Category Name Hash']
@@ -621,7 +642,7 @@ class OrderPlaceView(LoginRequiredMixin, View):
                                                                        logisticsCategoryNameHash,
                                                                        canBeMixed,
                                                                        skuMaxQtyperCategoryperParcelStandAlone)
-                            
+
                 # For products that can be mixed in a parcel     
                 elif canBeMixed == 1:
                     totalSkuQtyEWECanBeMixed += 1
@@ -689,7 +710,8 @@ class OrderPlaceView(LoginRequiredMixin, View):
         
         # parcelTableEWE.to_csv('parcelTableEWE.csv', index=False)
 
-        totalSkuPriceEWE = parcelTableEWE['sku Price'].astype(float).sum()
+        totalSkuPriceEWE = math.ceil(parcelTableEWE['sku Price'].astype(float).sum() * 10) / 10
+        totalSkuPriceEWECN = math.ceil(totalSkuPriceEWE * audExRate * 10) / 10
 
         # To prepare "parcelId_skuId_serviceId123" list
         parcelTableEWE["parcelId skuId addOnServiceId"] = parcelTableEWE["parcel Id"].astype(str) + "_" + parcelTableEWE["sku and Add-On Service ID List"]
@@ -716,7 +738,7 @@ class OrderPlaceView(LoginRequiredMixin, View):
 
             # To get the total quantity and total weight of product in each parcelId
             productCountInParcelList = temp['count In Parcel'].sum()
-            parcelWeight = temp['sku Weight'].astype(float).sum()
+            parcelWeight = math.ceil(temp['sku Weight'].astype(float).sum() * 10) / 10
 
             # parcel weight minimum count is 1Kg
             if parcelWeight < 1:
@@ -724,59 +746,74 @@ class OrderPlaceView(LoginRequiredMixin, View):
             else:
                 parcelPostage = parcelWeight * float(temp.iloc[0]['logistics Price per Unit'])
 
-            # To accumulate the postage
+            # To accumulate the postage in AUD
+            parcelPostage = math.ceil(parcelPostage * 10) / 10
+            parcelPostageCN = math.ceil(parcelPostage * audExRate * 10) / 10
             totalPostageEWE += parcelPostage
 
             # To contruct the element of dictionary
             parcelPackagingTableEWE[parcelIdEWEKey] = {'countInParcelAndSkuNameList': countInParcelAndSkuNameList,
                                                        'productCountInParcelList': productCountInParcelList,
                                                        'parcelWeight': parcelWeight, 
-                                                       'parcelPostage': parcelPostage}
+                                                       'parcelPostage': parcelPostage,
+                                                       'parcelPostageCN': parcelPostageCN}
 
 
         ###########################################################################################
         ###########################################################################################
         # total pay = product price + postage price
         # AuExpress
-        totalSkuPriceAuExpress = math.ceil(totalSkuPriceAuExpress * 100)/100
-        totalPostageAuExpress = math.ceil(totalPostageAuExpress * 100)/100
-        totalPayAuExpress = round(totalSkuPriceAuExpress + totalPostageAuExpress, 2)
+        totalPostageAuExpress = math.ceil(totalPostageAuExpress * 10) / 10
+        totalPostageAuExpressCN = math.ceil(totalPostageAuExpress * audExRate * 10) / 10
+
+        totalPayAuExpress = math.ceil((float(totalSkuPriceAuExpress) + totalPostageAuExpress + float(totalServicePrice)) * 10) / 10
+        totalPayAuExpressCN = math.ceil((totalSkuPriceAuExpressCN + totalPostageAuExpressCN + totalServicePriceCN) * 10) / 10
         
         # EWE
-        totalSkuPriceEWE = math.ceil(totalSkuPriceEWE * 100)/100
-        totalPostageEWE = math.ceil(totalPostageEWE * 100)/100
-        totalPayEWE = round(totalSkuPriceEWE + totalPostageEWE, 2)
+        totalPostageEWE = math.ceil(totalPostageEWE * 10) / 10
+        totalPostageEWECN = math.ceil(totalPostageEWE * audExRate * 10) / 10
+
+        totalPayEWE = math.ceil((float(totalSkuPriceEWE) + totalPostageEWE + float(totalServicePrice)) * 10) / 10
+        totalPayEWECN = math.ceil((totalSkuPriceEWECN + totalPostageEWECN + totalServicePriceCN) * 10) / 10
 
 
         # To summarize the response
         context = {
-                    'categories': categories,
-                    'senderAddresses': senderAddresses,
-                    'senderAddressDefault': senderAddressDefault,
-                    'receiverAddresses': receiverAddresses,
-                    'receiverAddressDefault': receiverAddressDefault,
+            'audExRate': audExRate,
+            'categories': categories,
+            'senderAddresses': senderAddresses,
+            'senderAddressDefault': senderAddressDefault,
+            'receiverAddresses': receiverAddresses,
+            'receiverAddressDefault': receiverAddressDefault,
 
-                    'skuIds': skuIds,
-                    'skuCountList': skuCountList,
-                    'skuIdandAddOnServiceIdsList': skuIdandAddOnServiceIdsList,
-                    'totalServiceQty': totalServiceQty,
-                    'totalServicePrice': totalServicePrice,
-                    'totalLogisticsWeight': totalLogisticsWeight,
-                    
-                    'parcelPackagingTableAuExpress': parcelPackagingTableAuExpress,
-                    'parcelIdandSkuIdandAddOnServiceIdsListAuExpress': parcelIdandSkuIdandAddOnServiceIdsListAuExpress,
-                    'totalSkuQtyAuExpress': totalSkuQtyAuExpressCannotBeMixed + totalSkuQtyAuExpressCanBeMixed,
-                    'totalSkuPriceAuExpress': totalSkuPriceAuExpress,
-                    'totalPostageAuExpress': totalPostageAuExpress,
-                    'totalPayAuExpress': totalPayAuExpress,
-                    
-                    'parcelPackagingTableEWE': parcelPackagingTableEWE,
-                    'parcelIdandSkuIdandAddOnServiceIdsListEWE': parcelIdandSkuIdandAddOnServiceIdsListEWE,
-                    'totalSkuQtyEWE': totalSkuQtyEWECannotBeMixed + totalSkuQtyEWECanBeMixed,
-                    'totalSkuPriceEWE': totalSkuPriceEWE,
-                    'totalPostageEWE': totalPostageEWE,
-                    'totalPayEWE': totalPayEWE,
-                }
+            'skuIds': skuIds,
+            'skuCountList': skuCountList,
+            'skuIdandAddOnServiceIdsList': skuIdandAddOnServiceIdsList,
+            'totalServiceQty': totalServiceQty,
+            'totalServicePrice': totalServicePrice,
+            'totalServicePriceCN': totalServicePriceCN,
+            'totalLogisticsWeight': totalLogisticsWeight,
+            
+            'parcelPackagingTableAuExpress': parcelPackagingTableAuExpress,
+            'parcelIdandSkuIdandAddOnServiceIdsListAuExpress': parcelIdandSkuIdandAddOnServiceIdsListAuExpress,
+            'totalSkuQtyAuExpress': totalSkuQtyAuExpressCannotBeMixed + totalSkuQtyAuExpressCanBeMixed,
+            'totalSkuPriceAuExpress': totalSkuPriceAuExpress,
+            'totalSkuPriceAuExpressCN': totalSkuPriceAuExpressCN,
+            'totalPostageAuExpress': totalPostageAuExpress,
+            'totalPostageAuExpressCN': totalPostageAuExpressCN,
+            'totalPayAuExpress': totalPayAuExpress,
+            'totalPayAuExpressCN': totalPayAuExpressCN,
+            
+            'parcelPackagingTableEWE': parcelPackagingTableEWE,
+            'parcelIdandSkuIdandAddOnServiceIdsListEWE': parcelIdandSkuIdandAddOnServiceIdsListEWE,
+            'totalSkuQtyEWE': totalSkuQtyEWECannotBeMixed + totalSkuQtyEWECanBeMixed,
+            'totalSkuPriceEWE': totalSkuPriceEWE,
+            'totalSkuPriceEWECN': totalSkuPriceEWECN,
+            'totalPostageEWE': totalPostageEWE,
+            'totalPostageEWECN': totalPostageEWECN,
+            'totalPayEWE': totalPayEWE,
+            'totalPayEWECN': totalPayEWECN,
+        }
 
         return render(request, 'orderPlace.html', context)
 
@@ -902,18 +939,21 @@ class OrderCommitView(LoginRequiredMixin, View):
         # 1. SuperPay - Wechat/Alipay: 1.0%, not included in the "totalprice"
         # 2. Strip - VISA/Master 3.5% + $0.3, included in the "totalprice"
         # 3. Bank Transfer
-        totalPriceBeforeHandlingCost = float(totalSkuPrice)+float(totalServicePrice)+float(totalPostage)
-        if paymentMethod == 1:
+        totalPriceBeforeHandlingCost = float(totalSkuPrice) + float(totalServicePrice) + float(totalPostage)
+        
+        if paymentMethod == 1 or paymentMethod == 2:
             rateSuperPay = 0.01
             totalHandlingFee = totalPriceBeforeHandlingCost * rateSuperPay
             totalPrice = totalPriceBeforeHandlingCost
-        elif paymentMethod == 2:
+        
+        elif paymentMethod == 3:
             rateStripe = 0.035
             totalHandlingFee = ((totalPriceBeforeHandlingCost + 0.3) / (1 - rateStripe)) * rateStripe + 0.3
             totalPrice = totalPriceBeforeHandlingCost + totalHandlingFee
+        
         else:
             totalHandlingFee = 0
-            totalPrice = totalPriceBeforeHandlingCost
+            totalPrice = totalPriceBeforeHandlingCost + totalHandlingFee
 
         # To construct “skuIdCount” list, via pivoting, one skuId/product per line, no duplicated skuIds in the table/list
         skuIdCountTable = pd.DataFrame(skuIdCountTable, columns=['sku Id', 'sku Count'])
@@ -954,7 +994,7 @@ class OrderCommitView(LoginRequiredMixin, View):
                                              totalServicePrice=totalServicePrice,
                                              
                                              totalLogisticsWeight=totalLogisticsWeight,
-                                             logisticsUnit = "Kg",
+                                             logisticsUnit="Kg",
                                              totalLogisticsPrice=totalPostage,
                                              
                                              totalHandlingFee = totalHandlingFee,
@@ -963,7 +1003,9 @@ class OrderCommitView(LoginRequiredMixin, View):
 
                                              orderNotes=orderNotes,
                                              
-                                             tradeNo=0)
+                                             tradeNo="",
+                                             paymentIntentDescription="",
+                                             paymentInvoicePdfUrl="")
 
 
             ###########################################################################################################
@@ -1022,8 +1064,8 @@ class OrderCommitView(LoginRequiredMixin, View):
                                                 skuName=sku.name,
                                                 skuCount=skuCount,
                                                 skuUnit=sku.unit,
-                                                skuPrice=sku.price,
-                                                skuGst=sku.gst,
+                                                skuPrice=math.ceil(float(sku.price) / 4.8 * 10) / 10,
+                                                skuGst=math.ceil(float(sku.gst) / 4.8 * 10) / 10,
                                                 comment="")
                     
                     # If update succeeds, break the for loop
@@ -1084,12 +1126,12 @@ class OrderCommitView(LoginRequiredMixin, View):
             for parcelPackagingTable in parcelPackagingTableList:
                 
 
-                # 1:{countInParcelAndSkuNameList:[[3,AptaGrowNutrient-DenseMilkDrinkFrom1+Years900g]],productCountInParcelList:3,parcelWeight:3.0,parcelPostage:23.4
+                # 1:{countInParcelAndSkuNameList:[[3,AptaGrowNutrient-DenseMilkDrinkFrom1+Years900g]],productCountInParcelList:3,parcelWeight:3.0,parcelPostage:23.4,parcelPostageCN:111.3
                 parcelPackagingTableItemList = parcelPackagingTable.split(":")
                 parcelId = parcelPackagingTableItemList[0]
                 skuQty = parcelPackagingTableItemList[3].split(",")[0]
                 parcelWeight = parcelPackagingTableItemList[4].split(",")[0]
-                parcelPostage = parcelPackagingTableItemList[5]
+                parcelPostage = parcelPackagingTableItemList[5].split(",")[0]
 
                 OrderTracking.objects.create(order=order,
                                              logisticsCompanyName=logisticsCompanyName,
@@ -1109,7 +1151,9 @@ class OrderCommitView(LoginRequiredMixin, View):
         transaction.savepoint_commit(saveId)
 
         # To clear shopping cart information from redis caching
-        # conn.hdel(cartKey, *sku_ids)
+        conn = get_redis_connection('default')
+        cartKey = 'cart_%s' % user.id
+        conn.delete(cartKey)
 
         # To return the "success" response
         return JsonResponse({'res': 8, 'message': '创建成功'})
@@ -1199,6 +1243,7 @@ class OrderDetailsView(LoginRequiredMixin, View):
         ###########################################################################################
         # To prepare output parameters
         context = {
+            'audExRate': audExRate,
             'orderId': str(orderId),
             'orderInfo': orderInfo,
             'parcelPackagingandAddOnServiceDict': parcelPackagingandAddOnServiceDict,
@@ -1220,18 +1265,48 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
         orderInfo = OrderInfo.objects.get(orderId=orderId)
         stripe.api_key = settings.STRIPE_SECRET_KEY
         
-        YOUR_DOMAIN = "http://127.0.0.1:8000"
-
 
         checkoutSession = stripe.checkout.Session.create(
+            client_reference_id=orderId,
+            customer_email=user.email,
             payment_method_types=['card'],
             line_items=[
                 {
                     'price_data': {
                         'currency': 'AUD',
-                        'unit_amount': int(orderInfo.totalPrice)*100,
+                        'unit_amount': int(math.ceil(float(orderInfo.totalSkuPrice) * 10) / 10 * 100),
                         'product_data': {
-                            'name': orderInfo.orderNotes,
+                            'name': "Total Product Price",
+                        },
+                    },
+                    'quantity': 1,
+                },
+                {
+                    'price_data': {
+                        'currency': 'AUD',
+                        'unit_amount': int(math.ceil(float(orderInfo.totalServicePrice) * 10) / 10 * 100),
+                        'product_data': {
+                            'name': "Total Add-On Service Price",
+                        },
+                    },
+                    'quantity': 1,
+                },
+                {
+                    'price_data': {
+                        'currency': 'AUD',
+                        'unit_amount': int(math.ceil(float(orderInfo.totalLogisticsPrice) * 10) / 10 * 100),
+                        'product_data': {
+                            'name': "Total Logistics Price",
+                        },
+                    },
+                    'quantity': 1,
+                },
+                {
+                    'price_data': {
+                        'currency': 'AUD',
+                        'unit_amount': int(math.ceil(float(orderInfo.totalHandlingFee) * 10) / 10 * 100),
+                        'product_data': {
+                            'name': "Total Transaction Handling Fee",
                         },
                     },
                     'quantity': 1,
@@ -1241,8 +1316,16 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
                 "orderId": orderInfo.orderId
             },
             mode='payment',
-            success_url=YOUR_DOMAIN + '/order/checkoutsuccess',
-            cancel_url=YOUR_DOMAIN + '/order/checkoutcancel',
+            customer_creation='always',
+            success_url=os.getenv("STRIPE_REDIRECT_DOMAIN") + '/order/checkoutsuccess',
+            cancel_url=os.getenv("STRIPE_REDIRECT_DOMAIN") + '/order/checkoutcancel',
+
+            invoice_creation={
+                "enabled": True,
+                "invoice_data": {
+                    "description": orderInfo.orderNotes,
+                }
+            }
         )
 
 
@@ -1254,7 +1337,7 @@ class CheckoutSuccessView(LoginRequiredMixin, View):
     
     def get(self, request):
 
-        return render(request, 'checkoutSuccess.html')
+        return render(request, 'checkoutSuccess.html', {'audExRate': audExRate})
 
 
 ### To create checkout cancel view
@@ -1262,10 +1345,10 @@ class CheckoutCancelView(LoginRequiredMixin, View):
     
     def get(self, request):
 
-        return render(request, 'checkoutCancel.html')
+        return render(request, 'checkoutCancel.html', {'audExRate': audExRate})
 
 
-### To create web hook from "Stripe"
+### To create web hook for "Stripe"
 @csrf_exempt
 def stripeWebhook(request):
 
@@ -1285,55 +1368,200 @@ def stripeWebhook(request):
         return HttpResponse(status=400)
 
     if event['type'] == 'checkout.session.completed':
+
+        print("checkout.session.completed", event)
+
         session = event['data']['object']
+
+        print("checkout.session.completed", session)
 
         customerEmail = session["customer_details"]["email"]
         orderId = session["metadata"]["orderId"]
+        paymentIntentDescription = session["payment_intent"]
 
         # To update the "OrderInfo"
-        OrderInfo.objects.filter(orderId=orderId).update(orderStatus=2)
+        OrderInfo.objects.filter(orderId=orderId).update(
+            orderStatus=2,
+            paymentIntentDescription=paymentIntentDescription,
+            )
 
-        # Send registration activation email via celery delay queue
+        # Send payment successful email via celery delay queue
         sendPaymentSuccessEmail.delay(customerEmail, orderId)
 
-        print(session)
+    if event['type'] == 'invoice.sent':
+
+        print("invoice.sent", event)
+
+        session = event['data']['object']
+
+        print("invoice.sent", session)
+
+        paymentIntentDescription = session["payment_intent"]
+        charge = session["charge"]
+        invoicePdfUrl = session["invoice_pdf"]
+
+        print(paymentIntentDescription)
+        print(charge)
+        print(invoicePdfUrl)
+
+        orderId = OrderInfo.objects.get(paymentIntentDescription=paymentIntentDescription).orderId
+        s3Url = uploadPdfToS3(invoicePdfUrl, f'media/paymentInvoicePdf/{orderId}-Invoice.pdf')
+        OrderInfo.objects.filter(paymentIntentDescription=paymentIntentDescription).update(
+            tradeNo=charge,
+            paymentInvoicePdfUrl=f'paymentInvoicePdf/{orderId}-Invoice.pdf'
+            )
 
     return HttpResponse(status=200)
 
 
-### To create the pdf of 
-class GeneratePDFView(View):
-    
-    def get(self, request, *args, **kwargs):
-        # Create a BytesIO buffer to receive the PDF data.
-        buffer = BytesIO()
+### To create web hook for "Supay WeChat Pay"
+@csrf_exempt
+def weChatPayWebhook(request):
 
-        # Create the PDF object using the buffer as its "file."
-        pdf = SimpleDocTemplate(buffer, pagesize=letter)
+    noticeId = request.GET.get('notice_id')
+    merchantTradeNo = request.GET.get('merchant_trade_no')
+    token = request.GET.get('token')
 
-        # Create a list to hold the content for the PDF
-        pdf_content = []
+    paramsNotificationURL = {
+		'notice_id': noticeId,
+        'merchant_trade_no': merchantTradeNo,
+        'authentication_code': settings.AUTHENTICATION_CODE,
+	}
 
-        # Define the styles for the document
-        styles = getSampleStyleSheet()
-        normal_style = styles['Normal']
+    encodedParamsNotificationURL = urlencode(paramsNotificationURL, quote_via=quote)
+    md5HashedParamsNotificationURL = hashlib.md5(encodedParamsNotificationURL.encode()).hexdigest()
 
-        # Add content to the PDF
-        pdf_content.append(Paragraph("Receipt", normal_style))
-        pdf_content.append(Spacer(1, 12))
-        pdf_content.append(Paragraph("Date: September 14, 2023", normal_style))
-        pdf_content.append(Paragraph("Item: Product Name", normal_style))
-        pdf_content.append(Paragraph("Price: $10.00", normal_style))
-        pdf_content.append(Paragraph("Quantity: 2", normal_style))
-        pdf_content.append(Paragraph("Total: $20.00", normal_style))
+    # To check if the token provided is same as the local generation
+    if token == md5HashedParamsNotificationURL:
 
-        # Build the PDF document
-        pdf.build(pdf_content)
+        url = 'https://api.superpayglobal.com/payment/bridge/notification_verification'
+        
+        paramsNotificationValidation = {
+            'notice_id': noticeId,
+            'merchant_trade_no': merchantTradeNo,
+        }
 
-        # Rewind the buffer and serve the PDF
-        buffer.seek(0)
-        response = FileResponse(buffer, as_attachment=True, filename='receipt.pdf')
-        return response
+        response = requests.get(url, params=paramsNotificationValidation)
+
+        if response.status_code == 200:
+            # Parse the JSON response
+            responseData = response.json()
+            
+            # Check if the response indicates success
+            if responseData['result'] == 'SUCCESS':
+                print('Notification validation successful')
+
+                orderInfo = OrderInfo.objects.get(orderId=merchantTradeNo)
+                user = orderInfo.user
+                customerEmail = user.email
+
+                # To update the "OrderInfo"
+                OrderInfo.objects.filter(orderId=merchantTradeNo).update(
+                    orderStatus=2,
+                    paymentIntentDescription="WeChatPay",
+                    )
+
+                # Send payment successful email via celery delay queue
+                sendPaymentSuccessEmail.delay(customerEmail, merchantTradeNo)
+
+            else:
+                sendWeChatPaynentFailureEmail.delay('info@auking.com.au', merchantTradeNo, "Notification validation failed")
+        
+        else:
+            print('Error:', response.status_code)
+            sendWeChatPaynentFailureEmail.delay('info@auking.com.au', merchantTradeNo, response.status_code)
+        
+
+    return HttpResponse(status=200)
+
+
+### To create web hook for "Supay Ali Pay"
+@csrf_exempt
+def aliPayWebhook(request):
+
+    noticeId = request.GET.get('notice_id')
+    merchantTradeNo = request.GET.get('merchant_trade_no')
+    token = request.GET.get('token')
+
+    paramsNotificationURL = {
+		'notice_id': noticeId,
+        'merchant_trade_no': merchantTradeNo,
+        'authentication_code': settings.AUTHENTICATION_CODE,
+	}
+
+    encodedParamsNotificationURL = urlencode(paramsNotificationURL, quote_via=quote)
+    md5HashedParamsNotificationURL = hashlib.md5(encodedParamsNotificationURL.encode()).hexdigest()
+
+    # To check if the token provided is same as the local generation
+    if token == md5HashedParamsNotificationURL:
+
+        url = 'https://api.superpayglobal.com/payment/bridge/notification_verification'
+        
+        paramsNotificationValidation = {
+            'notice_id': noticeId,
+            'merchant_trade_no': merchantTradeNo,
+        }
+
+        response = requests.get(url, params=paramsNotificationValidation)
+
+        if response.status_code == 200:
+            # Parse the JSON response
+            responseData = response.json()
+            
+            # Check if the response indicates success
+            if responseData['result'] == 'SUCCESS':
+                print('Notification validation successful')
+
+                orderInfo = OrderInfo.objects.get(orderId=merchantTradeNo)
+                user = orderInfo.user
+                customerEmail = user.email
+
+                # To update the "OrderInfo"
+                OrderInfo.objects.filter(orderId=merchantTradeNo).update(
+                    orderStatus=2,
+                    paymentIntentDescription="AliPay",
+                    )
+
+                # Send payment successful email via celery delay queue
+                sendPaymentSuccessEmail.delay(customerEmail, merchantTradeNo)
+
+            else:
+                sendWeChatPaynentFailureEmail.delay('info@auking.com.au', merchantTradeNo, "Notification validation failed")
+        
+        else:
+            print('Error:', response.status_code)
+            sendWeChatPaynentFailureEmail.delay('info@auking.com.au', merchantTradeNo, response.status_code)
+        
+
+    return HttpResponse(status=200)
+
+
+### To upload the invoice PDF from Stripe to AWS S3 /media/paymentInvoicePdf
+def uploadPdfToS3(pdfUrl, s3Path):
+
+    # Download the PDF file from the URL
+    response = requests.get(pdfUrl)
+
+    if response.status_code == 200:
+
+        # Create a BytesIO object to hold the PDF content
+        pdfBytes = BytesIO(response.content)
+
+        # Connect to your S3 bucket
+        s3 = boto3.client("s3", aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
+
+        # Upload the PDF file to your S3 bucket
+        s3Bucket = os.getenv("AWS_STORAGE_BUCKET_NAME")
+        s3.upload_fileobj(pdfBytes, s3Bucket, s3Path)
+
+        # Return the S3 URL of the uploaded file
+        s3Url = f"https://{s3Bucket}.s3.ap-southeast-2.amazonaws.com/{s3Path}"
+
+        return s3Url
+    else:
+
+        print("Failed to download PDF file from URL:", response.status_code)
+        return None
 
 
 ### To display the link expiration message and setup redirection to "register" page
@@ -1341,5 +1569,5 @@ class BankTransferDetailsView(View):
 
     def get(self, request):
 
-        return render(request, 'bankTransferDetails.html')
+        return render(request, 'bankTransferDetails.html', {'audExRate': audExRate})
 

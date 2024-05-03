@@ -11,10 +11,12 @@ class OrderInfoAdmin(admin.ModelAdmin):
                     "logisticsCompanyName", "logisticsParcelCount", "paymentMethod",\
                     "totalSkuQty", "totalSkuPrice", "totalServiceQty", "totalServicePrice",\
                     "totalLogisticsWeight", "logisticsUnit", "totalLogisticsPrice",\
-                    "totalHandlingFee", "totalPrice", "orderStatus", "orderNotes", "tradeNo")
+                    "totalHandlingFee", "totalPrice", "orderStatus", "orderNotes",\
+                    "tradeNo", "paymentIntentDescription", "paymentInvoicePdfUrl")
     list_filter = ("sender", "receiver", "logisticsCompanyName", "paymentMethod", "orderStatus")
     search_fields = ("orderId", "user__user", "sender", "senderAddr", "senderTel", "receiver", "receiverAddr", "receiverTel",\
-                     "logisticsCompanyName", "paymentMethod", "orderNotes", "tradeNo")
+                     "logisticsCompanyName", "paymentMethod", "orderNotes",\
+                     "tradeNo", "paymentIntentDescription", "paymentInvoicePdfUrl")
 
     actions = ['export_as_csv']
     def export_as_csv(self, request, queryset):

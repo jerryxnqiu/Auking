@@ -8,21 +8,24 @@ class OrderInfo(BaseModel):
     """Order Model, one line per order, depending on 'User' table"""
 
     PAYMENT_METHODS = {
-        1: '微信/支付宝',
-        2: 'VISA/Master',
-        3: '银行转账'
+        1: '微信',
+        2: '支付宝',
+        3: 'VISA/Master',
+        4: '银行转账'
     }
 
     PAYMENT_METHODS_ENUM = {
-        "WechatPAY/aliPAY": 1,
-        "VISA/Master": 2,
-        "Bank Transfer": 3
+        "WechatPAY": 1,
+        "AliPAY": 2,
+        "VISA/Master": 3,
+        "Bank Transfer": 4
     }
 
     PAYMENT_METHOD_CHOICES = (
-        (1, '微信/支付宝'),
-        (2, 'VISA/Master'),
-        (3, '银行转账'),
+        (1, '微信'),
+        (2, '支付宝'),
+        (3, 'VISA/Master'),
+        (4, '银行转账'),
     )
 
     ORDER_STATUS_ENUM = {
@@ -84,7 +87,13 @@ class OrderInfo(BaseModel):
     orderNotes = models.CharField(max_length=1024, default='', verbose_name='订单备注')
 
     # Alipay, Wechat Pay, Union Pay receipt number if there is
+    # Stripe:   charge ID
+    # 
     tradeNo = models.CharField(max_length=128, default='', verbose_name='支付编号')
+    
+    # Stripe:   payment intend
+    paymentIntentDescription = models.CharField(max_length=128, default='', verbose_name='支付描述')
+    paymentInvoicePdfUrl = models.FileField(upload_to="paymentInvoicePdf/", default='', max_length=255, verbose_name='Stripe的支付发票')
 
     class Meta:
         db_table = 'dbOrderInfo'

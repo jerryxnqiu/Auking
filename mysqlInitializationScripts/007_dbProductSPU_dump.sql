@@ -28,7 +28,7 @@ CREATE TABLE `dbProductSPU` (
   `update_time` datetime(6) NOT NULL,
   `is_delete` tinyint(1) NOT NULL,
   `name` varchar(96) NOT NULL,
-  `nameEN` varchar(96) NOT NULL,
+  `nameCN` varchar(96) NOT NULL,
   `detail` longtext NOT NULL,
   `category_id` bigint NOT NULL,
   `subCategory_id` bigint NOT NULL,

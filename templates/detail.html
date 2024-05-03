@@ -29,9 +29,9 @@
     <div class="breadcrumb">
         <a href="{% url 'product:index' %}" class="link-dark" style="text-decoration: none;">全部分类</a>
         <span class="ps-1 pe-1">></span>
-        <a href="{% url 'product:categoryList' categoryName=sku.category.nameEN page=1 %}" class="link-dark" style="text-decoration: none;"> {{ sku.category.name }} </a>
+        <a href="{% url 'product:categoryList' categoryName=sku.category.name page=1 %}" class="link-dark" style="text-decoration: none;"> {{ sku.category.name }} </a>
         <span class="ps-1 pe-1">></span>
-        <a href="{% url 'product:subCategoryList' subCategoryName=sku.subCategory.nameEN page=1 %}" class="link-dark" style="text-decoration: none;"> {{ sku.subCategory.name }} </a>
+        <a href="{% url 'product:subCategoryList' subCategoryName=sku.subCategory.name page=1 %}" class="link-dark" style="text-decoration: none;"> {{ sku.subCategory.name }} </a>
         <span class="ps-1 pe-1">></span>
         <span> 商品详情</span>
     </div>
@@ -99,7 +99,7 @@
                             class="btn btn-light border" 
                             style="padding: 4px; margin-right: 8px; margin-bottom: 8px;"
                             aria-pressed="true">
-                            {{ addOnService.name }}  ${{ addOnService.price }}/{{ addOnService.unit }}
+                            {{ addOnService.name }} ${{ addOnService.price }} (~¥{{ addOnService.priceCN }})/{{ addOnService.unit }}
                         </button>
                         {% endfor %}
                     </div>
@@ -108,7 +108,8 @@
                 <!-- Unit Price -->
                 <div class="container" style="margin-bottom: 16px;">
                     <p style="margin-bottom: 4px; font-weight: bold;">单价</p>
-                    <span class="show_pirze" style="font-size: 24px;font-weight: bolder;color: red;">¥<em>{{ sku.price }}</em></span>
+                    <span class="showPirze" style="font-size: 24px; font-weight: bolder; color: red;">$<em>{{ sku.price }}</em></span>
+                    <span class="showPirzeCN" style="font-size: 24px; font-weight: bolder; color: red;">(~¥<em>{{ sku.priceCN }}</em>)</span>
 				    <span class="show_unit" style="padding-left: 16px;">单位：{{ sku.unit }}</span>
                 </div>
 
@@ -124,7 +125,7 @@
 
                 <!-- Total Price -->
                 <div class="container" style="margin-bottom: 16px;">
-                    <div class="total" style="margin-bottom: 4px; font-weight: bold;">总价：<em style="font-size: 24px;font-weight: bolder;color: red;"></em></div>
+                    <div class="total" style="margin-bottom: 4px; font-weight: bold;">总价：<em style="font-size: 24px; font-weight: bolder; color: red;"></em></div>
                 </div>
 
                 <!-- Action -->
@@ -159,14 +160,17 @@
     // To calculate the product total price, count
     function updateProductCount() {
         // Get the product unit price and quantity
-        price = $('.show_pirze').children('em').text()
+        price = $('.showPirze').children('em').text()
+        priceCN = $('.showPirzeCN').children('em').text()
         count = $('.numShow').val()
         // Calculate the total price
         price = parseFloat(price)
+        priceCN = parseFloat(priceCN)
         count = parseInt(count)
         amount = price*count
+        amountCN = priceCN*count
         // Set the total price
-        $('.total').children('em').text("¥" + amount.toFixed(2))
+        $('.total').children('em').text("$" + amount.toFixed(1) + " (~¥" + amountCN.toFixed(1) + ")")
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////

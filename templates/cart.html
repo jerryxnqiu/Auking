@@ -73,7 +73,8 @@
 
             <!-- Product Price -->
             <div class="productPrice col-1">
-                <p style="padding: 0px; margin: 0px;">{{ sku.price }}</p>
+                <p style="padding: 0px; margin: 0px;">${{ sku.price }}</p>
+                <p style="padding: 0px; margin: 0px;">(~¥{{ sku.priceCN }} 元)</p>
             </div>
 
             <!-- Quantity adjustment -->
@@ -89,7 +90,8 @@
 
             <!-- Product Value -->
             <div class="amount_show col-1">
-                <p style="padding: 0px; margin: 0px;">$ {{ sku.amount }} 澳元</p>
+                <p style="padding: 0px; margin: 0px;">${{ sku.amount }} AUD</p>
+                <p style="padding: 0px; margin: 0px;">(~¥{{ sku.amountCN }} 元)</p>
             </div>
 
             <!-- Product Delete -->
@@ -122,9 +124,9 @@
 
             <!-- Summary -->
             <div class="col-xl-8 col-md-7">
-                合计(不含运费)
+                合计(只含商品)
                 <span style="color: red; font-weight: bolder; font-size: 24px;">
-                    ¥<em>{{ totalPrice }}</em>
+                    $<em>{{ totalPrice }}</em>(~¥<em>{{ totalPriceCN }}</em>)
                 </span>
                 <br>
                 共计 <b style="color: red; font-weight: bolder; font-size: 24px;">{{ totalCount }}</b> 件商品
@@ -161,13 +163,13 @@
 
             // To accumulate the product quantity and subtotal
             count = parseInt(count)
-            amount = parseFloat(amount)
+            amount = parseFloat(amount.match(/\d+\.\d+/)[0])
             totalCount += count
             totalPrice += amount
         })
 
         // To set the product quantity and total price with check mark on
-        $('.settlements').find('em').text(totalPrice.toFixed(2))
+        $('.settlements').find('em').text(totalPrice.toFixed(1))
         $('.settlements').find('b').text(totalCount)
     }
 
@@ -180,10 +182,10 @@
         count = sku_shoppingCartList.find('.numShow').val()
         
         // To calculate the product price subtotal
-        amount = parseInt(count)*parseFloat(price)
+        amount = parseInt(count)*parseFloat(price.match(/\d+\.\d+/)[0])
         
         // To set the product price subtotal
-        sku_shoppingCartList.children('.amount_show').text(amount.toFixed(2)+'元')
+        sku_shoppingCartList.children('.amount_show').text(amount.toFixed(1)+'元')
     }
 
 

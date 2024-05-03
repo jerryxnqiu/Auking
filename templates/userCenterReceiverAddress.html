@@ -73,13 +73,20 @@
 
 				<!-- Receiver IdImageFront -->
 				<div class="col-2" style="text-align: center; word-wrap: break-word;">
-					<img src="{{ receiverAddress.receiverIdImageFront.url }}" class="w-100">
-					
+					{% if receiverAddress.receiverIdImageFront != "请上传身份证正面图片" %}
+    					<img src="{{ receiverAddress.receiverIdImageFront.url }}" class="w-100">
+					{% else %}
+						{{ receiverAddress.receiverIdImageFront }}
+					{% endif %}
 				</div>
 
 				<!-- Receiver IdImageBack -->
 				<div class="col-2" style="text-align: center; word-wrap: break-word;">
-					<img src="{{ receiverAddress.receiverIdImageBack.url }}" class="w-100">
+					{% if receiverAddress.receiverIdImageBack != "请上传身份证背面图片" %}
+						<img src="{{ receiverAddress.receiverIdImageBack.url }}" class="w-100">
+					{% else %}
+						{{ receiverAddress.receiverIdImageBack }}
+					{% endif %}
 				</div>
 
 				<!-- If to Delete -->

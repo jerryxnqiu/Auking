@@ -51,7 +51,7 @@
 		<div class="container">
 			<div class="col-xl-11 col-lg-10 d-flex align-items-center">
 				<div>
-					{% with categoryNameVar=category.nameEN %}
+					{% with categoryNameVar=category.name %}
 					<a class="navbar-brand" style="font-weight: bold;" href="{% url 'product:categoryList' categoryName=categoryNameVar page=1 %}">{{ category.name }}</a>
 					{% endwith %}
 				</div>
@@ -70,10 +70,10 @@
 						{% for productBanner in category.titleBanners %}
 						<li class="nav-item">
 							<span>|</span>
-								{% if productBanner.subCategory.nameEN == "Lego" %}
-								<a href="{% url 'product:spuList' spuName=productBanner.spu.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.spu.nameEN }}</a>
+								{% if productBanner.subCategory.name == "Lego" %}
+								<a href="{% url 'product:spuList' spuName=productBanner.spu.name page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.spu.name }}</a>
 								{% else %}
-								<a href="{% url 'product:subCategoryList' subCategoryName=productBanner.subCategory.nameEN page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.subCategory.nameEN }}</a>
+								<a href="{% url 'product:subCategoryList' subCategoryName=productBanner.subCategory.name page=1 %}" class="link-dark" style="text-decoration: none; padding: 0px 5px;">{{ productBanner.subCategory.name }}</a>
 								{% endif %}
 						</li>
 						{% endfor %}
@@ -82,7 +82,7 @@
 				</div>
 			</div>
 			<div class="col-xl-1 col-lg-2">
-				{% with categoryNameVar=category.nameEN %}
+				{% with categoryNameVar=category.name %}
 				<a href="{% url 'product:categoryList' categoryName=categoryNameVar page=1 %}" class="link-dark" id="" style="font-size: small; float: right; margin: 0px; padding: 0px; text-decoration:none;">查看更多></a>
 				{% endwith %}
 			</div>
@@ -108,7 +108,8 @@
 									<img src="{{ productBanner.sku.image.url }}" alt width="100px">
 								</div>
 								<div class="container d-flex justify-content-center align-items-center" style="height: 15px; width: 180px; padding-top: 5px;">
-									<div class="link-dark lh-1" style="font-size: small; font-weight: bold;">¥ {{ productBanner.sku.price }}</div>
+									<div class="link-dark lh-1" style="font-size: small; font-weight: bold;">${{ productBanner.sku.price }}</div>
+									<div class="link-dark lh-1" style="font-size: small; color: grey;">(~¥{{ productBanner.sku.priceCN }})</div>
 									<img src="{% static 'images/shoppingCart.png' %}" style="padding-left: 3px; height: 15px;">
 								</div>
 								<div class="container d-flex justify-content-center align-items-center" style="height: 40px; width: 180px; padding: 5px 0px;">
