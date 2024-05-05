@@ -257,7 +257,7 @@
 						merchant_id: '{{ MERCHANT_ID }}',
 						authentication_code: '{{ AUTHENTICATION_CODE }}',
 						merchant_trade_no: orderId,
-						total_amount: '0.01',
+						total_amount: orderTotalPrice,
 					};
 					var stringToken = new URLSearchParams(paramsToken);
 					var token = md5(stringToken)
@@ -276,7 +276,7 @@
 						product_title: orderId,
 						merchant_trade_no: orderId,
 						currency: 'AUD',
-						total_amount: '0.01',
+						total_amount: orderTotalPrice,
 						create_time: formattedCreateTime,
 						notification_url: 'https://auking.com.au/order/wechatpaywebhook',
 						token: token,
@@ -314,7 +314,7 @@
 						merchant_id: '{{ MERCHANT_ID }}',
 						authentication_code: '{{ AUTHENTICATION_CODE }}',
 						merchant_trade_no: orderId,
-						total_amount: '0.01',
+						total_amount: orderTotalPrice,
 					};
 					var stringToken = new URLSearchParams(paramsToken);
 					var token = md5(stringToken)
@@ -333,7 +333,7 @@
 						product_title: orderId,
 						merchant_trade_no: orderId,
 						currency: 'AUD',
-						total_amount: '0.01',
+						total_amount: orderTotalPrice,
 						create_time: formattedCreateTime,
 						notification_url: 'https://auking.com.au/order/alipaywebhook',
 						token: token,
@@ -345,24 +345,9 @@
 					}).join('&');
 
 					var fullUrl = "{{ ALIPAY_URL }}" + '?' + queryParams;
-
-					fetch(fullUrl)
-					.then(response => {
-                    	if (!response.ok) {
-                        	throw new Error('Network response was not ok');
-                    	}
-                    	return response.json();
-                	})
-                	.then(data => {
-						orderId = data.merchant_trade_no
-						paymentResult = data.result
-
-						console.log(data)
-
-					})
-					.catch(error => {
-						console.error('Error:', error);
-					});
+					
+					// To redirect the page to the SuPay payment URL
+					window.location.href = fullUrl;
 
 				}
 				

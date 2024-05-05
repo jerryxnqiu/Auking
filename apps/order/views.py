@@ -1,7 +1,7 @@
 from typing import Any
 import stripe
 from django.shortcuts import render, redirect
-from django.http import JsonResponse, FileResponse, HttpResponse
+from django.http import JsonResponse, FileResponse, HttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.db.models import Sum
 from django.views.generic import View
@@ -16,7 +16,7 @@ import math
 import hashlib
 from urllib.parse import urlencode, quote
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -33,9 +33,6 @@ from order.models import OrderInfo, OrderProduct, OrderProductandServiceMapping,
 from product.models import ProductCategory, ProductSKU, ProductAddOnService, ProductLogisticsAuExpress, ProductLogisticsEWE
 from user.models import SenderAddress, ReceiverAddress
 
-
-### Global variable for RMB to AUD exchange rate
-audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
 
 ### Create your views here.
@@ -167,6 +164,9 @@ class OrderPlaceView(LoginRequiredMixin, View):
     ###################################################################################################################
     # To get the content from "cart.html"
     def post(self, request):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
         
         ###########################################################################################
         ### 1. Getting data #######################################################################
@@ -1165,7 +1165,10 @@ class OrderDetailsView(LoginRequiredMixin, View):
     ###################################################################################################################
     ###################################################################################################################
     def get(self, request, orderId):
-        
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         # To get the user information
         user = request.user
 
@@ -1337,6 +1340,9 @@ class CheckoutSuccessView(LoginRequiredMixin, View):
     
     def get(self, request):
 
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         return render(request, 'checkoutSuccess.html', {'audExRate': audExRate})
 
 
@@ -1344,6 +1350,9 @@ class CheckoutSuccessView(LoginRequiredMixin, View):
 class CheckoutCancelView(LoginRequiredMixin, View):
     
     def get(self, request):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         return render(request, 'checkoutCancel.html', {'audExRate': audExRate})
 
@@ -1444,11 +1453,9 @@ def weChatPayWebhook(request):
         response = requests.get(url, params=paramsNotificationValidation)
 
         if response.status_code == 200:
-            # Parse the JSON response
-            responseData = response.json()
             
             # Check if the response indicates success
-            if responseData['result'] == 'SUCCESS':
+            if 'SUCCESS' in response.text:
                 print('Notification validation successful')
 
                 orderInfo = OrderInfo.objects.get(orderId=merchantTradeNo)
@@ -1471,7 +1478,6 @@ def weChatPayWebhook(request):
             print('Error:', response.status_code)
             sendWeChatPaynentFailureEmail.delay('info@auking.com.au', merchantTradeNo, response.status_code)
         
-
     return HttpResponse(status=200)
 
 
@@ -1505,11 +1511,9 @@ def aliPayWebhook(request):
         response = requests.get(url, params=paramsNotificationValidation)
 
         if response.status_code == 200:
-            # Parse the JSON response
-            responseData = response.json()
             
             # Check if the response indicates success
-            if responseData['result'] == 'SUCCESS':
+            if 'SUCCESS' in response.text:
                 print('Notification validation successful')
 
                 orderInfo = OrderInfo.objects.get(orderId=merchantTradeNo)
@@ -1568,6 +1572,9 @@ def uploadPdfToS3(pdfUrl, s3Path):
 class BankTransferDetailsView(View):
 
     def get(self, request):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         return render(request, 'bankTransferDetails.html', {'audExRate': audExRate})
 

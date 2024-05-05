@@ -8,8 +8,6 @@ import math
 from product.models import ProductCategory, ProductSKU, ProductAddOnService
 from utils.mixin import LoginRequiredMixin
 
-### Global variable for RMB to AUD exchange rate
-audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
 ### Create your views here.
 ### To delete a record in the shopping cart
@@ -166,6 +164,9 @@ class CartInfoView(LoginRequiredMixin, View):
     # Shopping cart info summary page
 
     def get(self, request):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         ### 1. Receiving data #####################################################################
         user = request.user

@@ -26,8 +26,6 @@ from celery_tasks.tasks import sendRegisterActivateEmail, sendReactivateEmail
 from captcha.fields import ReCaptchaField
 from captcha.widgets import ReCaptchaV2Checkbox
 
-### Global variable for RMB to AUD exchange rate
-audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
 # Create your views here.
 ### To perform registration
@@ -36,6 +34,9 @@ class RegisterView(View):
 
     def get(self, request):
 
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         # To get the product category
         categories = ProductCategory.objects.all()
 
@@ -43,6 +44,8 @@ class RegisterView(View):
     
     def post(self, request):
 
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
         
         ### 1. Receiving data #####################################################################
         username = request.POST.get('userName')
@@ -137,6 +140,9 @@ class ActivationLinkExpiresView(View):
 
     def get(self, request):
 
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         return render(request, 'activationLinkExpires.html', {'audExRate': audExRate})
 
 
@@ -146,6 +152,9 @@ class LoginView(View):
 
     def get(self, request):
         """Login View"""
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         # To check if username is remembered
         if 'username' in request.COOKIES:
@@ -172,6 +181,8 @@ class LoginView(View):
     def post(self, request):
         """Login checking"""
 
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         ### 1. Receiving data #####################################################################
         username = request.POST.get('username')
@@ -235,6 +246,9 @@ class PasswordResetView(View):
     """Help user to recover the password"""
 
     def get(self, request):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
         
         # To get the product category
         categories = ProductCategory.objects.all()
@@ -242,6 +256,9 @@ class PasswordResetView(View):
         return render(request, 'passwordReset.html', {'audExRate': audExRate, 'categories': categories})
 
     def post(self, request):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         ### 1. Receiving data #####################################################################
         email = request.POST.get('email')
@@ -280,6 +297,9 @@ class PasswordResetConfirmView(View):
 
     def get(self, request, token):
         """To reset the password for user"""
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         serializer = Serializer(settings.SECRET_KEY)
         try:
@@ -367,6 +387,9 @@ class PasswordResetLinkExpiresView(View):
 
     def get(self, request):
 
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         return render(request, 'passwordResetLinkExpires.html', {'audExRate': audExRate})
 
 
@@ -375,6 +398,9 @@ class PasswordResetSuccessView(View):
 
     def get(self, request):
 
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         return render(request, 'passwordResetSuccess.html', {'audExRate': audExRate})
 
 
@@ -382,6 +408,9 @@ class PasswordResetSuccessView(View):
 class PasswordResetFailView(View):
 
     def get(self, request):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         return render(request, 'passwordResetFail.html', {'audExRate': audExRate})
 
@@ -397,6 +426,9 @@ class UserInfoView(LoginRequiredMixin, View):
         # 1. if current user is NOT login, an instance of AnonymousUser (request.user.is_authenticated = False)
         # 2. if current user is login, an instance of User (request.user.is_authenticated = True)
         # django can also pass request.user information to the template
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         # To get the login user information
         user = request.user
@@ -434,6 +466,9 @@ class UserOrderView(LoginRequiredMixin, View):
     def get(self, request, page):
         """Display"""
 
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        
         user = request.user
 
         # To get user order information
@@ -533,6 +568,10 @@ class SenderAddressView(LoginRequiredMixin, View):
 
     def get(self, request):
         """Display"""
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         # To get the login user information
         user = request.user
 
@@ -557,6 +596,10 @@ class SenderAddressView(LoginRequiredMixin, View):
         """User Center - To update or add sender address"""
         # 1. updateSenderAddress
         # 2. newSenderAddress
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         if 'updateSenderAddress' in request.POST:
 
             # To initialize all to be "False"
@@ -645,6 +688,10 @@ class ReceiverAddressView(LoginRequiredMixin, View):
     
     def get(self, request):
         """Display"""
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         # To get the login user information
         user = request.user
         
@@ -668,6 +715,10 @@ class ReceiverAddressView(LoginRequiredMixin, View):
         """User Center - To update or add receiver address"""
         # 1. updateReceiverAddress
         # 2. newReceiverAddress
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+
         if 'updateReceiverAddress' in request.POST:
             
             # To initialize all to be "False"

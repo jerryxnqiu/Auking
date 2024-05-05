@@ -12,24 +12,13 @@ from urllib.parse import urlencode, quote
 # 	}
 
 paramsToken = {
-		'notice_id': '1000000088',
-        'merchant_trade_no': '88888888',
-        'authentication_code': 'c3c5134dea12900d29c5deb2d5775162',
+		'notice_id': '2024050400947567845108310016',
+        'merchant_trade_no': '202405041351082',
+        'authentication_code': 'lkjh678jGQDJokl9XQHaHIyfuytttqqq',
 	}
 
 encoded_params = urlencode(paramsToken, quote_via=quote)
 md5_hash = hashlib.md5(encoded_params.encode()).hexdigest()
 
 print(md5_hash)
-print(md5_hash=='95d7068b3d94c7d644bd02a5c48b5103')
-
-
-A$198.00
-Total Product Price
-A$132.30
-Total Add-On Service Price
-A$15.40
-Total Logistics Price
-A$43.00
-Total Transaction Handling Fee
-A$7.30
+print(md5_hash=='31efa335db208c42f200db78271fa8d1')

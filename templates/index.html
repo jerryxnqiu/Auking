@@ -52,7 +52,7 @@
 			<div class="col-xl-11 col-lg-10 d-flex align-items-center">
 				<div>
 					{% with categoryNameVar=category.name %}
-					<a class="navbar-brand" style="font-weight: bold;" href="{% url 'product:categoryList' categoryName=categoryNameVar page=1 %}">{{ category.name }}</a>
+					<a class="navbar-brand" style="font-weight: bold;" href="{% url 'product:categoryList' categoryName=categoryNameVar page=1 %}">{{ category.nameCN }}</a>
 					{% endwith %}
 				</div>
 				<button 

@@ -274,12 +274,13 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 #### 4.2 Stop containers and update nginx.conf to the full version
     ^C
     Upadte nginx.conf to the full version
-    sudo docker-compose -f docker-compose.prod.yml up
+    - sudo docker-compose -f docker-compose.prod.yml up
 
 
 ### 5 To load mysql tables and to establish search index and index page display
 #### 5.1 To load mysql database from pre-filled tables
-    To login MySQL container: sudo docker exec -it <container ID> /bin/bash
+    To login MySQL container: 
+    - sudo docker exec -it <container ID> /bin/bash
 
     mysql -u auking -p auking < ./mysqlInitializationScripts/001_dbProductLogisticsAuExpress_dump.sql
     mysql -u auking -p auking < ./mysqlInitializationScripts/002_dbProductLogisticsEWE_dump.sql
@@ -292,9 +293,20 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
     mysql -u auking -p auking < ./mysqlInitializationScripts/009_dbProductImage_dump.sql
 
 #### 5.2 To establish search index and index page display
-    To login djangoContainer: sudo docker exec -it <container ID> /bin/bash
+    To login djangoContainer: 
+    - sudo docker exec -it <container ID> /bin/bash
 
     python manage.py rebuild_index
     python manage.py updateIndexCategoryProductBanner
 
 
+#### 6 Some Useful docker commands
+    sudo docker-compose down
+    sudo docker-compose up
+    
+    To list all images
+    - sudo docker images -a
+
+    To remove an image
+    - sudo docker rmi -f <Image> Image
+aukingpassword

@@ -9,8 +9,6 @@ import math
 from .models import ProductCategory, ProductSubCategory, ProductSKU, ProductSPU, ProductImage, ProductAddOnService,\
                     ProductLogisticsAuExpress, ProductLogisticsEWE, IndexProductBanner, IndexCategoryProductBanner, IndexPromotionBanner
 
-### Global variable for RMB to AUD exchange rate
-audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
 ### import logging
 ### logger = logging.getLogger(__name__)
@@ -22,6 +20,9 @@ class IndexView(View):
     
     def get(self, request):
         """display"""
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         # To get the product category
         categories = ProductCategory.objects.all()
@@ -78,6 +79,9 @@ class DetailView(View):
     """Product Detail Information Page"""
     
     def get(self, request, productId):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
 
         try:
             sku = ProductSKU.objects.get(id=productId)
@@ -182,6 +186,9 @@ class ProductCategoryListView(View):
     """Category List Page"""
 
     def get(self, request, categoryName, page):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
         
         # To get the product category
         categories = ProductCategory.objects.all()
@@ -278,6 +285,9 @@ class ProductSubCategoryListView(View):
     """SubCategory List Page"""
 
     def get(self, request, subCategoryName, page):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
         
         # To get the product subCategory
         subCategories = ProductSubCategory.objects.all()
@@ -375,6 +385,9 @@ class ProductSPUListView(View):
     """SPU List Page"""
 
     def get(self, request, spuName, page):
+
+        ### Global variable for RMB to AUD exchange rate
+        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
         
         # To get the product spu
         spus = ProductSPU.objects.all()
