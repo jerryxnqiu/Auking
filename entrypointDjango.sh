@@ -13,9 +13,9 @@ then
 fi
 
 # for debug
-python manage.py runserver 0.0.0.0:8000
+# python manage.py runserver 0.0.0.0:8000
 
 # For production
-# gunicorn --bind 0.0.0.0:8000 --workers 4 auking.wsgi:application
+gunicorn --bind 0.0.0.0:8000 --workers 4 auking.wsgi:application
 
 $@
