@@ -309,4 +309,3 @@ https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
 
     To remove an image
     - sudo docker rmi -f <Image> Image
-aukingpassword
