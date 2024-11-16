@@ -22,7 +22,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from io import BytesIO
 from celery_tasks.tasks import sendPaymentSuccessEmail, sendWeChatPaynentFailureEmail
-from bocfx import bocfx
+from utils.exchangeRate import CNYtoAUDExRate
 import math
 import os
 from dotenv import load_dotenv
@@ -166,7 +166,7 @@ class OrderPlaceView(LoginRequiredMixin, View):
     def post(self, request):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
         
         ###########################################################################################
         ### 1. Getting data #######################################################################
@@ -1167,7 +1167,7 @@ class OrderDetailsView(LoginRequiredMixin, View):
     def get(self, request, orderId):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
 
         # To get the user information
         user = request.user
@@ -1341,7 +1341,7 @@ class CheckoutSuccessView(LoginRequiredMixin, View):
     def get(self, request):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
 
         return render(request, 'checkoutSuccess.html', {'audExRate': audExRate})
 
@@ -1352,7 +1352,7 @@ class CheckoutCancelView(LoginRequiredMixin, View):
     def get(self, request):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
 
         return render(request, 'checkoutCancel.html', {'audExRate': audExRate})
 
@@ -1574,7 +1574,7 @@ class BankTransferDetailsView(View):
     def get(self, request):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
 
         return render(request, 'bankTransferDetails.html', {'audExRate': audExRate})
 

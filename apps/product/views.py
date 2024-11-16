@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.core.paginator import Paginator
 from django.views.generic import View
 from django_redis import get_redis_connection
-from bocfx import bocfx
+from utils.exchangeRate import CNYtoAUDExRate
 import math
 
 from .models import ProductCategory, ProductSubCategory, ProductSKU, ProductSPU, ProductImage, ProductAddOnService,\
@@ -22,7 +22,7 @@ class IndexView(View):
         """display"""
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
 
         # To get the product category
         categories = ProductCategory.objects.all()
@@ -81,7 +81,7 @@ class DetailView(View):
     def get(self, request, productId):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
 
         try:
             sku = ProductSKU.objects.get(id=productId)
@@ -188,7 +188,7 @@ class ProductCategoryListView(View):
     def get(self, request, categoryName, page):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
         
         # To get the product category
         categories = ProductCategory.objects.all()
@@ -287,7 +287,7 @@ class ProductSubCategoryListView(View):
     def get(self, request, subCategoryName, page):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
         
         # To get the product subCategory
         subCategories = ProductSubCategory.objects.all()
@@ -387,7 +387,7 @@ class ProductSPUListView(View):
     def get(self, request, spuName, page):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
         
         # To get the product spu
         spus = ProductSPU.objects.all()

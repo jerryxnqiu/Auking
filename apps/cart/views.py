@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.http import JsonResponse
 from django_redis import get_redis_connection
-from bocfx import bocfx
+from utils.exchangeRate import CNYtoAUDExRate
 import math
 
 from product.models import ProductCategory, ProductSKU, ProductAddOnService
@@ -166,7 +166,7 @@ class CartInfoView(LoginRequiredMixin, View):
     def get(self, request):
 
         ### Global variable for RMB to AUD exchange rate
-        audExRate = math.ceil(float(bocfx('AUD','SE,ASK')[0]) * 100) / 10000
+        audExRate = CNYtoAUDExRate()
 
         ### 1. Receiving data #####################################################################
         user = request.user
