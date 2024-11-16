@@ -122,7 +122,7 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    command: /bin/sh -c "echo '0 1 1 * * certbot renew --quiet && nginx -s reload' > /etc/cron.d/certbot && cron && tail -f /dev/null"
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email jerry_qiu@hotmail.com -d auking.com.au --agree-tos
     depends_on:
       - web
 
